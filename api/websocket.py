@@ -4,6 +4,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from fastapi.encoders import jsonable_encoder
 from models.game import Role
+from engine.access import is_god_mode, observer_user_id
 
 router = APIRouter()
 
@@ -93,6 +94,11 @@ async def _verify_ws_token(token: str, game_id: int = None) -> bool:
         if sess is None:
             return False
         if game_id is not None:
+            game = await repo.get_game(game_id)
+            if game is None:
+                return False
+            if is_god_mode(game):
+                return observer_user_id(game) == sess.user_id
             players = await repo.get_players(game_id)
             return any(p.is_human and p.user_id == sess.user_id for p in players)
         return True
@@ -125,8 +131,12 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int, token: str = Qu
                 from api.routes import _build_game_state
                 from schemas.game import EventOut
                 state = await _build_game_state(session, game_id, user)
-                human = next(p for p in state.players if p.is_human)
-                events = await repo.get_visible_events(game_id, human.seat, Role(human.role))
+                if state.mode == "god":
+                    events = await repo.get_all_events(game_id)
+                else:
+                    human = next(p for p in state.players if p.is_human)
+                    events = await repo.get_visible_events(game_id, human.seat, Role(human.role))
+                connected_data["god_mode"] = state.mode == "god"
                 connected_data["state"] = jsonable_encoder(state)
                 connected_data["events"] = jsonable_encoder([EventOut.model_validate(e) for e in events])
                 task = manager._game_tasks.get(game_id)

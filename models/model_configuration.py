@@ -15,6 +15,8 @@ class ModelPlatformConfiguration(Base):
     base_url: Mapped[str] = mapped_column(String(2048), nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     thinking_format: Mapped[str] = mapped_column(String(30), default="auto", nullable=False)
+    # chat_completions, responses, or anthropic_messages. Official providers stay on chat_completions.
+    api_format: Mapped[str] = mapped_column(String(32), default="chat_completions", nullable=False)
 
 
 class ModelConfiguration(Base):

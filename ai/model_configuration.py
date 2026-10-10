@@ -13,7 +13,8 @@ PROVIDER_URLS = {
     "bailian": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "volcengine": "https://ark.cn-beijing.volces.com/api/v3",
 }
-PROVIDER_NAMES = {"bailian": "百炼", "volcengine": "火山方舟", "openai": "OpenAI 兼容"}
+PROVIDER_NAMES = {"bailian": "百炼", "volcengine": "火山方舟", "openai": "自定义"}
+API_FORMATS = ("chat_completions", "responses", "anthropic_messages")
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,7 @@ class ModelConnection:
     enabled: bool = True
     thinking_enabled: bool = False
     thinking_format: str = "auto"
+    api_format: str = "chat_completions"
 
     def __post_init__(self):
         if self.thinking_enabled:
@@ -61,6 +63,7 @@ async def load_connections(session):
         api_key=platforms[row.platform_id].api_key, base_url=platforms[row.platform_id].base_url,
         enabled=row.enabled and platforms[row.platform_id].enabled,
         thinking_format=platforms[row.platform_id].thinking_format,
+        api_format=getattr(platforms[row.platform_id], "api_format", None) or "chat_completions",
     ) for row in rows if row.platform_id in platforms])
 
 

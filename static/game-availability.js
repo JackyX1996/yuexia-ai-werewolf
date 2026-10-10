@@ -1,4 +1,5 @@
 // Keep the lobby button aligned with the server's enabled model pool.
+var _gameMode = 'seat';
 let _canCreateGame = false;
 let _creatingGame = false;
 let _modelAvailabilityRequest = 0;
@@ -26,7 +27,8 @@ async function refreshGameAvailability() {
         if (availability.ai_mode === 'simulated') {
             hint.textContent = '模拟预览已就绪，无需配置真实模型。';
         } else if (_canCreateGame) {
-            hint.textContent = `已有 ${availability.available_count} 个可用模型，开局随机选取 11 个，不足时重复分配。`;
+            const seats = _gameMode === 'god' ? 12 : 11;
+            hint.textContent = `已有 ${availability.available_count} 个可用模型，开局随机选取 ${seats} 个，不足时重复分配。`;
         } else {
             const admin = isAdminUser();
             hint.textContent = admin ? '尚无可用模型，请先配置并启用至少 1 个模型。' : '尚无可用模型，请联系管理员配置并启用至少 1 个模型。';

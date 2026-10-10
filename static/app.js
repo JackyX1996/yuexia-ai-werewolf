@@ -3,6 +3,7 @@ let gameId = null;
 let ws = null;
 let myRole = null;
 let mySeat = null;
+let godMode = false;
 let players = [];
 let sheriffSeat = null;
 let _speakingTimer = null;
@@ -42,7 +43,7 @@ const ROLE_NAMES = {
 const PHASE_NAMES = {
     created: "等待开始", sheriff_campaign: "警长竞选", sheriff_withdraw: "退水环节", sheriff_vote: "警长投票",
     night_start: "夜晚", wolf_kill: "狼人行动", seer_check: "预言家查验",
-    witch_act: "女巫行动", night_resolve: "天亮了", day_start: "白天",
+    witch_act: "女巫行动", night_resolve: "天亮了", day_start: "白天", wolf_strategy: "狼队",
     day_speech: "白天讨论", day_vote: "投票环节", vote_resolve: "投票结算",
     hunter_check: "猎人技能", last_words: "遗言", win_check: "结算检查", game_end: "游戏结束"
 };
@@ -158,11 +159,12 @@ function renderSeats() {
         if (p.seat === sheriffSeat) div.classList.add('sheriff');
         if (p.seat === _currentSpeaker) div.classList.add('speaking');
         if (p.seat === _inspectedSeat) div.classList.add('selected');
-        const isWolfTeammate = myRole === 'werewolf' && !p.is_human && p.role === 'werewolf';
+        const isWolfTeammate = p.role === 'werewolf' && (godMode || (myRole === 'werewolf' && !p.is_human));
         if (isWolfTeammate) div.classList.add('wolf-teammate');
         const visibleRole = p.role ? ROLE_NAMES[p.role] : null;
         const name = p.is_human ? (getNickname() || '你') : (p.nickname || `玩家${p.seat}`);
-        const identity = p.is_human ? '你 · ' + (visibleRole || '存活')
+        const identity = godMode ? (visibleRole || '身份未知')
+            : p.is_human ? '你 · ' + (visibleRole || '存活')
             : isWolfTeammate ? '狼人队友' : visibleRole || '身份未知';
         const state = p.is_human && !p.is_alive ? '已出局'
             : identity + (p.is_alive && !p.can_vote ? ' · 无投票权' : '');
@@ -199,6 +201,7 @@ function resetGameScreen() {
     document.querySelector('.notebook-panel').classList.remove('open');
     _notebookTrigger = null;
     _followLogs = true;
+    godMode = false;
     $('#notebook-backdrop').classList.add('hidden');
     $('#mobile-notes-button').setAttribute('aria-expanded','false');
     $('#mobile-notes-button').textContent='✎ 推理簿';
@@ -595,6 +598,7 @@ function handleWSMessage(msg) {
                 hideInputBar(); clearInterval(_actionClock);
             }
             if (data.state) {
+                godMode = data.state.mode === 'god' || data.god_mode === true;
                 players = data.state.players; sheriffSeat = data.state.sheriff_player_seat;
                 _currentRound = data.state.current_round;
                 setPhase(data.state.current_phase, _currentRound);
@@ -718,8 +722,17 @@ function handleWSMessage(msg) {
             }
             break;
 
+        case 'god_event':
+            if (data.event_type === 'wolf_discuss' && data.actor_seat) {
+                addLog(`<span class="log-seat">${data.actor_seat}号</span>：${data.content || '……'}`, 'wolf_strategy', 'speech');
+            } else {
+                const line = privateEventLine(data);
+                if (line) addLog(line.text, data.phase, line.kind);
+            }
+            break;
+
         case "prompt_action":
-            handlePrompt(data.prompt_type, data);
+            if (!godMode) handlePrompt(data.prompt_type, data);
             break;
 
         case "game_end":
@@ -929,9 +942,9 @@ async function loadGameList(page) {
                 ? (WINNER_NAMES[g.winner] || "已结束")
                 : g.status === "running" ? "进行中" : "等待中";
             const statusClass = g.status === "finished" ? "finished" : g.status === "running" ? "running" : "waiting";
-            const roleText = g.my_role ? (ROLE_NAMES[g.my_role] || g.my_role) : "";
+            const roleText = g.mode === 'god' ? '上帝视角' : (g.my_role ? (ROLE_NAMES[g.my_role] || g.my_role) : "");
             const dateText = utcDate(g.created_at).toLocaleString('zh-CN');
-            const iconClass = isWolf ? "wolf-icon" : (g.my_role ? "good-icon" : "neutral-icon");
+            const iconClass = g.mode === 'god' ? 'neutral-icon' : (isWolf ? "wolf-icon" : (g.my_role ? "good-icon" : "neutral-icon"));
 
             div.innerHTML = `
                 <div class="game-list-left">
@@ -939,7 +952,7 @@ async function loadGameList(page) {
                     <div class="game-list-meta">
                         <div class="game-list-top">
                             <span class="game-list-id">#${g.id}</span>
-                            ${roleText ? `<span class="game-list-role">${g.my_seat}号·${roleText}</span>` : ""}
+                            ${roleText ? `<span class="game-list-role">${g.mode === 'god' ? roleText : `${g.my_seat}号·${roleText}`}</span>` : ""}
                         </div>
                         <div class="game-list-bottom">
                             <span class="game-list-round">第${g.current_round}轮</span>
@@ -1011,19 +1024,22 @@ async function createGame() {
     resetGameScreen();
 
     try {
-        const res = await apiFetch("/api/games", { method: "POST" });
+        const res = await apiFetch("/api/games", {
+            method: "POST",
+            body: JSON.stringify({ mode: _gameMode }),
+        });
         const game = await res.json();
         gameId = game.id;
         players = game.players;
-        mySeat = players.find(p => p.is_human)?.seat;
-        myRole = players.find(p => p.is_human)?.role;
+        godMode = game.mode === 'god';
+        mySeat = godMode ? null : players.find(p => p.is_human)?.seat;
+        myRole = godMode ? null : players.find(p => p.is_human)?.role;
 
         show("game-screen");
         history.pushState(null, "", `/game/${gameId}`);
-        $("#role-info").textContent = `你是 ${mySeat}号位 · ${ROLE_NAMES[myRole] || myRole}`;
         loadNotes(); renderSeats();
         $('#room-label').textContent = `房间 #${gameId} · 预女猎白`;
-        addLog(`游戏已创建，你是${mySeat}号位 ${ROLE_NAMES[myRole] || myRole}`);
+        addLog(godMode ? '上帝模式已开始。十二个座位都是 AI，身份和夜间行动对你可见。' : `游戏已创建，你是${mySeat}号位 ${ROLE_NAMES[myRole] || myRole}`);
 
         connectWS(gameId);
         await apiFetch(`/api/games/${gameId}/start`, { method:'POST' });
@@ -1034,7 +1050,7 @@ async function createGame() {
     } finally {
         _creatingGame = false;
         btn.disabled = !_canCreateGame;
-        btn.innerHTML = '进入村庄 · 开始对局 <span>→</span>';
+        btn.innerHTML = startButtonLabel();
     }
 }
 
@@ -1047,8 +1063,9 @@ async function restoreGame(gId) {
 
         gameId = game.id;
         players = game.players;
-        mySeat = players.find(p => p.is_human)?.seat;
-        myRole = players.find(p => p.is_human)?.role;
+        godMode = game.mode === 'god';
+        mySeat = godMode ? null : players.find(p => p.is_human)?.seat;
+        myRole = godMode ? null : players.find(p => p.is_human)?.role;
         sheriffSeat = game.sheriff_player_seat;
 
         if (game.status === "finished") {
@@ -1066,7 +1083,6 @@ async function restoreGame(gId) {
 
         show("game-screen");
         history.pushState(null, "", `/game/${gameId}`);
-        $("#role-info").textContent = `你是 ${mySeat}号位 · ${ROLE_NAMES[myRole] || myRole}`;
         setPhase(game.current_phase, game.current_round);
         $('#room-label').textContent = `房间 #${gameId} · 预女猎白`;
         loadNotes(); renderSeats();
@@ -1204,7 +1220,50 @@ function setConnection(online) {
 function setActionBusy(busy) {
     document.querySelectorAll('#input-bar button').forEach(button => button.disabled = busy);
 }
+function selectGameMode(mode) {
+    _gameMode = mode === 'god' ? 'god' : 'seat';
+    document.querySelectorAll('[data-game-mode]').forEach(button => {
+        const selected = button.dataset.gameMode === _gameMode;
+        button.classList.toggle('active', selected);
+        button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    const note = $('#hero-mode-note');
+    if (note) note.textContent = _gameMode === 'god' ? '12 AI · 你旁观' : '11 AI + 你';
+    const caption = $('#cast-caption');
+    if (caption) caption.textContent = _gameMode === 'god' ? '十二位对手，你在月下看完全程。' : '十一位对手，各有心思。';
+    const button = $('#btn-create');
+    if (button && !_creatingGame) button.innerHTML = startButtonLabel();
+    if (getToken()) refreshGameAvailability();
+}
+
+function startButtonLabel() {
+    return _gameMode === 'god' ? '上帝视角 · 观看对局 <span>→</span>' : '进入村庄 · 开始对局 <span>→</span>';
+}
+
+function privateEventLine(event) {
+    const who = event.actor_seat ? `${event.actor_seat}号` : '';
+    if (event.event_type === 'wolf_kill') return {text: event.content || `狼人决定击杀${event.target_seat}号`, kind: 'highlight-kill'};
+    if (event.event_type === 'seer_result') return {text: `第${event.round}夜 ${who}查验 ${event.target_seat}号：${event.content}`, kind: 'highlight-seer'};
+    if (event.event_type === 'witch_save') return {text: `第${event.round}夜 ${who}使用解药，目标 ${event.target_seat}号`, kind: 'highlight-save'};
+    if (event.event_type === 'witch_poison') return {text: event.content || `第${event.round}夜 ${who}毒了${event.target_seat}号`, kind: 'highlight-poison'};
+    if (event.content) return {text: `${who}内心：${event.content}`, kind: 'god'};
+    return null;
+}
+
 function syncIdentity() {
+    const eyebrow = document.querySelector('.identity-card .eyebrow');
+    if (godMode) {
+        if (eyebrow) eyebrow.textContent = '旁观 · 上帝视角';
+        $('#role-info').textContent = '上帝视角';
+        $('#identity-icon').textContent = '☾';
+        $('#identity-icon').classList.remove('role-art');
+        $('#identity-icon').dataset.role = '';
+        $('#role-tip').textContent = '你不入座。十二位 AI 的身份、夜间行动和内心都可见。';
+        $('#waiting-title').textContent = '正在旁观';
+        $('#waiting-tip').textContent = '这一局没有需要你提交的操作。';
+        return;
+    }
+    if (eyebrow) eyebrow.textContent = '你的身份 · 仅你可见';
     $('#role-info').textContent = mySeat ? `${mySeat}号 · ${ROLE_NAMES[myRole] || '身份待揭晓'}` : '身份待揭晓';
     $('#identity-icon').textContent = '';
     $('#identity-icon').dataset.role = myRole || '';
@@ -1223,7 +1282,9 @@ function setPhase(phase, round) {
     $('#phase-text').textContent = PHASE_NAMES[phase] || phase;
     $('#round-text').textContent = _currentRound ? `第 ${_currentRound} ${night?'夜':'天'}` : '准备入座';
     $('#table-phase').textContent = PHASE_NAMES[phase] || '静待夜幕降临';
-    $('#table-hint').textContent = night ? '夜间行动仅当事人可见' : '听完发言，再作判断';
+    $('#table-hint').textContent = godMode
+        ? (night ? '夜间行动、查验和狼队讨论都对你可见' : '你能看见全部身份')
+        : (night ? '夜间行动仅当事人可见' : '听完发言，再作判断');
     if (!['day_speech','sheriff_campaign'].includes(phase)) { _speechOrder=[]; renderSpeechQueue(); }
     updateRoundFilter();
 }
@@ -1232,7 +1293,8 @@ function setSpeaker(seat, thinking = false) {
     document.querySelector('#speaker-focus .speaker-orb').innerHTML = seat ? portraitHTML(seat) : '<span class="focus-moon">☾</span>';
     $('#speaker-focus').classList.toggle('thinking', thinking);
     $('#speaker-title').textContent = seat ? `${getDisplayName(seat)}${thinking?' 正在斟酌发言':''}` : (PHASE_NAMES[_currentPhase] || '等待对局开始');
-    $('#speaker-subtitle').textContent = seat ? (seat===mySeat ? '轮到你了，说出你的判断。' : thinking ? '留意 TA 会回应谁，又会把票带向谁。' : '发言已送达，可在下方回看原话。') : '你的判断只来自已公开的信息与自己的技能。';
+    const idle = godMode ? '十二位 AI 会自行发言、用技能和投票。' : '你的判断只来自已公开的信息与自己的技能。';
+    $('#speaker-subtitle').textContent = seat ? (seat===mySeat ? '轮到你了，说出你的判断。' : thinking ? '留意 TA 会回应谁，又会把票带向谁。' : '发言已送达，可在下方回看原话。') : idle;
     document.querySelectorAll('.seat').forEach(el=>el.classList.toggle('speaking',el.id===`seat-${seat}`));
     renderSpeechQueue();
 }
@@ -1272,6 +1334,15 @@ function renderHistory(events) {
         _currentRound=e.round;
         if(['sheriff_elected','sheriff_transfer'].includes(e.event_type)) historySheriff=e.target_seat || null;
         if(e.event_type==='wolf_explode' && e.phase?.startsWith('sheriff')) historySheriff=null;
+        if (godMode && e.visibility && e.visibility !== 'all') {
+            if (e.event_type === 'wolf_discuss' && e.actor_seat) {
+                addLog(`<span class="log-seat">${e.actor_seat}号</span>：${e.content || '……'}`, 'wolf_strategy', 'speech');
+            } else {
+                const line = privateEventLine(e);
+                if (line) addLog(line.text, e.phase, line.kind);
+            }
+            continue;
+        }
         if(['day_speech','sheriff_campaign','last_words','wolf_discuss'].includes(e.event_type) && e.actor_seat) {
             addLog(`<span class="log-seat">${e.actor_seat}号</span>：${e.content||'过。'}`,e.event_type,'speech');
         } else if(['vote_result','sheriff_vote_result'].includes(e.event_type)) {

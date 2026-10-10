@@ -24,6 +24,7 @@ from engine.roles import (
     can_hunter_shoot, idiot_survives_exile,
 )
 from engine.sheriff import elect_sheriff, transfer_sheriff
+from engine.access import is_god_mode
 from engine.events import extract_key_events
 from engine.nicknames import assign_nicknames
 from engine.actions import action_error
@@ -64,6 +65,9 @@ class GameManager:
         self.public_turn: dict = {}
         self.diagnostic_phase = None
         self.diagnostic_round = None
+        self.god_mode = False
+        if getattr(self.repo, "event_hook", None) is None:
+            self.repo.event_hook = self._relay_god_event
 
     # ── Notify helpers ──
 
@@ -79,6 +83,28 @@ class GameManager:
             self.public_turn[msg_type] = data
         if self.ws_broadcast:
             await self.ws_broadcast(game_id, msg_type, data)
+
+    async def _relay_god_event(self, event):
+        """Push private night actions and thoughts to an observing human."""
+        if not self.god_mode:
+            return
+        visibility = getattr(getattr(event, "visibility", None), "value", getattr(event, "visibility", None))
+        if visibility in (None, "all"):
+            return
+        content = event.content or ""
+        if not content.strip() and event.target_seat is None:
+            return
+        # Do not commit here. The surrounding action still owns the transaction.
+        if self.ws_broadcast:
+            await self.ws_broadcast(event.game_id, "god_event", {
+                "round": event.round,
+                "phase": event.phase,
+                "event_type": event.event_type,
+                "actor_seat": event.actor_seat,
+                "target_seat": event.target_seat,
+                "content": content,
+                "visibility": visibility,
+            })
 
     async def _wait_human_action(self, game_id: int, prompt_type: str,
                                   prompt_data: dict, timeout: float = None) -> dict:
@@ -148,21 +174,26 @@ class GameManager:
 
     # ── Game creation ──
 
-    async def create_game(self, human_user_id: int = None) -> Game:
+    async def create_game(self, human_user_id: int = None, mode: str = "seat") -> Game:
         async with configuration_lock:
-            return await self._create_game(human_user_id)
+            return await self._create_game(human_user_id, mode)
 
-    async def _create_game(self, human_user_id: int = None) -> Game:
+    async def _create_game(self, human_user_id: int = None, mode: str = "seat") -> Game:
+        if mode not in ("seat", "god"):
+            raise ValueError("mode 只能是 seat 或 god")
         # Validate before creating rows, so an empty pool produces no broken room.
-        ai_connections = pick_connections(settings.total_players - 1)
-        game = await self.repo.create_game()
+        ai_count = settings.total_players if mode == "god" else settings.total_players - 1
+        ai_connections = pick_connections(ai_count)
+        config = {"mode": mode}
+        if mode == "god":
+            config["observer_user_id"] = human_user_id
+        game = await self.repo.create_game(config=config)
         roles = get_standard_role_list()
         random.shuffle(roles)
         personalities = random.sample(PERSONALITY_KEYS, len(PERSONALITY_KEYS))
 
-        human_seat = random.randint(1, settings.total_players)
+        human_seat = None if mode == "god" else random.randint(1, settings.total_players)
         ai_pers_idx = 0
-        ai_count = settings.total_players - 1
 
         # Get AI users from DB
         ai_users = await self.repo.get_ai_users(ai_count)
@@ -171,7 +202,7 @@ class GameManager:
         for seat_idx in range(settings.total_players):
             seat = seat_idx + 1
             role = roles[seat_idx]
-            is_human = (seat == human_seat)
+            is_human = human_seat is not None and seat == human_seat
             personality = None
             user_id = None
             nickname = None
@@ -1754,6 +1785,7 @@ class GameManager:
         game = await self.repo.get_game(game_id)
         if not game:
             return
+        self.god_mode = is_god_mode(game)
 
         if not resume_after_day:
             await self.repo.update_game(game, status=GameStatus.running, started_at=datetime.utcnow())

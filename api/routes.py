@@ -9,10 +9,12 @@ from db.session import get_session
 from db.repository import GameRepository
 from engine.game_manager import GameManager
 from schemas.game import GameCreate, GameState, PlayerInfo, EventOut, GameListItem, GameListResponse
+from typing import Optional
 from models.game import GameStatus, Role
 from models.user import User
 from api.auth import get_current_user
 from api.websocket import manager as ws_manager
+from engine.access import game_mode, is_god_mode, observer_user_id
 from engine.events import extract_key_events
 from engine.recovery import completed_day_checkpoint
 from ai.diagnostics import record_decision
@@ -27,22 +29,31 @@ async def runtime_info(request: Request):
     return {"ai_mode": getattr(request.app.state, "ai_mode", "live")}
 
 
-async def require_game_player(repo, game_id: int, user: User):
+async def authorize_game(repo, game_id: int, user: User):
+    """Return the game, its seats, and the seated human. God games have no seat."""
+    game = await repo.get_game(game_id)
+    if not game:
+        raise HTTPException(404, "Game not found")
     players = await repo.get_players(game_id)
+    if is_god_mode(game):
+        if observer_user_id(game) != user.id:
+            raise HTTPException(403, "你不能访问其他玩家的对局")
+        return game, players, None
     player = next((p for p in players if p.is_human and p.user_id == user.id), None)
     if not player:
         raise HTTPException(403, "你不能访问其他玩家的对局")
-    return player
+    return game, players, player
 
 
 @router.post("/games", response_model=GameState)
 async def create_game(
+    body: Optional[GameCreate] = None,
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     gm = GameManager(session, ws_broadcast=ws_manager.broadcast)
     try:
-        game = await gm.create_game(human_user_id=user.id)
+        game = await gm.create_game(human_user_id=user.id, mode=(body.mode if body else "seat"))
     except ModelConfigurationError as error:
         raise HTTPException(400, str(error))
     return await _build_game_state(session, game.id, user)
@@ -59,14 +70,16 @@ async def list_games(
     games, total = await repo.get_games_by_user(user.id, page=page, page_size=page_size)
     items = []
     for g in games:
-        human_player = next((p for p in g.players if p.user_id == user.id), None)
+        human_player = next((p for p in g.players if p.is_human and p.user_id == user.id), None)
+        watching = is_god_mode(g)
         items.append(GameListItem(
             id=g.id,
             status=g.status.value,
+            mode=game_mode(g),
             winner=g.winner.value if g.winner else None,
             current_round=g.current_round,
-            my_role=human_player.role.value if human_player else None,
-            my_seat=human_player.seat if human_player else None,
+            my_role=None if watching else (human_player.role.value if human_player else None),
+            my_seat=None if watching else (human_player.seat if human_player else None),
             created_at=g.created_at,
             started_at=g.started_at,
         ))
@@ -90,10 +103,7 @@ async def start_game(
 ):
     async with ws_manager.start_lock:
         repo = GameRepository(session)
-        game = await repo.get_game(game_id)
-        if not game:
-            raise HTTPException(404, "Game not found")
-        await require_game_player(repo, game_id, user)
+        game, _, _ = await authorize_game(repo, game_id, user)
         if game.status != GameStatus.waiting:
             raise HTTPException(400, "Game already started")
 
@@ -117,16 +127,12 @@ async def get_events(
     session: AsyncSession = Depends(get_session),
 ):
     repo = GameRepository(session)
-    game = await repo.get_game(game_id)
-    if not game:
-        raise HTTPException(404, "Game not found")
-
-    player = await require_game_player(repo, game_id, user)
-    if seat is not None and seat != player.seat:
-        raise HTTPException(403, "只能查看自己的游戏视角")
-    if game.status == GameStatus.finished:
+    game, _, player = await authorize_game(repo, game_id, user)
+    if is_god_mode(game) or game.status == GameStatus.finished:
         events = await repo.get_all_events(game_id, round)
     else:
+        if seat is not None and seat != player.seat:
+            raise HTTPException(403, "只能查看自己的游戏视角")
         events = await repo.get_visible_events(game_id, player.seat, player.role, round)
 
     return [EventOut.model_validate(e) for e in events]
@@ -139,14 +145,10 @@ async def get_review(
     session: AsyncSession = Depends(get_session),
 ):
     repo = GameRepository(session)
-    game = await repo.get_game(game_id)
-    if not game:
-        raise HTTPException(404, "Game not found")
-    await require_game_player(repo, game_id, user)
+    game, players, _ = await authorize_game(repo, game_id, user)
     if game.status != GameStatus.finished:
         raise HTTPException(400, "Game not finished yet")
 
-    players = await repo.get_players(game_id)
     events = await repo.get_all_events(game_id)
 
     # Prefer the model drawn for this game. Old rows fall back to the user record.
@@ -189,10 +191,7 @@ async def end_game(
     session: AsyncSession = Depends(get_session),
 ):
     repo = GameRepository(session)
-    game = await repo.get_game(game_id)
-    if not game:
-        raise HTTPException(404, "Game not found")
-    await require_game_player(repo, game_id, user)
+    game, _, _ = await authorize_game(repo, game_id, user)
     if game.status == GameStatus.finished:
         raise HTTPException(400, "Game already finished")
 
@@ -231,8 +230,12 @@ async def _build_game_state(session: AsyncSession, game_id: int, user: User = No
     if not game:
         raise HTTPException(404, "Game not found")
 
-    players = await repo.get_players(game_id)
-    human_player = await require_game_player(repo, game_id, user) if user else None
+    if user:
+        game, players, human_player = await authorize_game(repo, game_id, user)
+    else:
+        players = await repo.get_players(game_id)
+        human_player = None
+    watching = is_god_mode(game)
 
     player_infos = []
     for p in players:
@@ -247,8 +250,9 @@ async def _build_game_state(session: AsyncSession, game_id: int, user: User = No
         )
         if p.role == Role.idiot and not p.can_vote:
             info.role = p.role.value
-        # Reveal role to the human player, their wolf teammates, or after game ends
-        if (human_player and p.id == human_player.id) or game.status == GameStatus.finished:
+        # God view sees every role. A seated player sees only their own role,
+        # wolf teammates, and the full board after the game ends.
+        if watching or (human_player and p.id == human_player.id) or game.status == GameStatus.finished:
             info.role = p.role.value
         elif (human_player and human_player.role == Role.werewolf
               and p.role == Role.werewolf):
@@ -258,6 +262,7 @@ async def _build_game_state(session: AsyncSession, game_id: int, user: User = No
     return GameState(
         id=game.id,
         status=game.status.value,
+        mode=game_mode(game),
         current_phase=game.current_phase,
         current_round=game.current_round,
         winner=game.winner.value if game.winner else None,

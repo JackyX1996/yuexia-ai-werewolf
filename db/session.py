@@ -95,6 +95,14 @@ def _ensure_sqlite_columns(sync_conn):
             "ALTER TABLE model_configuration ADD COLUMN platform_id VARCHAR(36) "
             "REFERENCES model_platform_configuration(id)"
         )
+    if inspect(sync_conn).has_table("model_platform_configuration"):
+        platform_columns = {row[1] for row in sync_conn.exec_driver_sql(
+            "PRAGMA table_info(model_platform_configuration)").fetchall()}
+        if "api_format" not in platform_columns:
+            sync_conn.exec_driver_sql(
+                "ALTER TABLE model_platform_configuration ADD COLUMN api_format "
+                "VARCHAR(32) NOT NULL DEFAULT 'chat_completions'"
+            )
 
 
 async def _seed_users():

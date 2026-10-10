@@ -17,6 +17,7 @@ class ModelConfigurationInput(BaseModel):
     thinking_enabled: Literal[False] = False
     # Compatible endpoints use different extensions. Keep this choice explicit.
     thinking_format: Literal["auto", "enable_thinking", "thinking", "reasoning_effort", "none"] = "auto"
+    api_format: Literal["chat_completions", "responses", "anthropic_messages"] = "chat_completions"
 
     @field_validator("model_names")
     @classmethod
@@ -45,6 +46,7 @@ class ModelConfigurationInput(BaseModel):
         # endpoints can be retained on update by the API, or use compatible mode.
         if self.provider in PROVIDER_URLS:
             self.base_url = PROVIDER_URLS[self.provider]
+            self.api_format = "chat_completions"
             return self
         try:
             url = urlsplit(self.base_url)
@@ -56,6 +58,6 @@ class ModelConfigurationInput(BaseModel):
         if not valid:
             raise ValueError("Base URL 必须是有效的 HTTP(S) 地址，不能包含账号、查询参数或片段")
         self.base_url = self.base_url.rstrip("/")
-        if self.base_url.endswith("/chat/completions"):
-            raise ValueError("Base URL 请填写 API 根地址（如 /v1），不要包含 /chat/completions")
+        if self.base_url.endswith(("/chat/completions", "/responses", "/messages")):
+            raise ValueError("Base URL 请填写服务根地址，不要带上 /chat/completions、/responses 或 /messages")
         return self

@@ -1,5 +1,5 @@
 from typing import Optional, List
-from sqlalchemy import select, and_
+from sqlalchemy import Integer, cast, func, or_, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.game import Game, GamePlayer, GameStatus, Role, WitchState, CauseOfDeath
@@ -12,11 +12,12 @@ from models.game_result import GameResult
 class GameRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+        self.event_hook = None
 
     # ── Game CRUD ──
 
-    async def create_game(self) -> Game:
-        game = Game(status=GameStatus.waiting, current_phase="created", current_round=0)
+    async def create_game(self, config: dict = None) -> Game:
+        game = Game(status=GameStatus.waiting, current_phase="created", current_round=0, config=config)
         self.session.add(game)
         await self.session.flush()
         return game
@@ -104,6 +105,8 @@ class GameRepository:
         )
         self.session.add(event)
         await self.session.flush()
+        if self.event_hook is not None:
+            await self.event_hook(event)
         return event
 
     async def get_visible_events(self, game_id: int, seat: int, role: Role,
@@ -203,26 +206,23 @@ class GameRepository:
     # ── Game list ──
 
     async def get_games_by_user(self, user_id: int, page: int = 1, page_size: int = 10):
-        """Returns (games, total_count) with pagination."""
-        base_query = select(Game).join(GamePlayer, GamePlayer.game_id == Game.id).where(
-            GamePlayer.user_id == user_id
-        )
-        # Count total
-        from sqlalchemy import func
+        """Returns (games, total_count) with pagination.
+
+        A person appears here as a seated player, or as the observer of a god game.
+        """
+        seated = select(GamePlayer.game_id).where(GamePlayer.user_id == user_id)
+        observer = cast(func.json_extract(Game.config, "$.observer_user_id"), Integer)
+        member = or_(Game.id.in_(seated), observer == user_id)
         count_result = await self.session.execute(
-            select(func.count(func.distinct(Game.id))).select_from(Game).join(
-                GamePlayer, GamePlayer.game_id == Game.id
-            ).where(GamePlayer.user_id == user_id)
+            select(func.count(Game.id)).where(member)
         )
         total = count_result.scalar() or 0
 
-        # Paginated query
         offset = (page - 1) * page_size
         result = await self.session.execute(
-            base_query.order_by(Game.id.desc()).offset(offset).limit(page_size)
+            select(Game).where(member).order_by(Game.id.desc()).offset(offset).limit(page_size)
         )
-        games = list(result.scalars().unique().all())
-        return games, total
+        return list(result.scalars().all()), total
 
     async def save_game_results(self, results: List[GameResult]):
         for r in results:

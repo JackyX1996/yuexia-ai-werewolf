@@ -53,6 +53,7 @@ def public_configuration(platform, models):
         "api_key_masked": masked_api_key(platform.api_key),
         "enabled": platform.enabled, "thinking_enabled": False,
         "thinking_format": platform.thinking_format,
+        "api_format": getattr(platform, "api_format", None) or "chat_completions",
     }
 
 
@@ -108,7 +109,8 @@ async def create_configuration(data: ModelConfigurationInput, user=Depends(requi
     async with configuration_lock:
         platform = ModelPlatformConfiguration(
             id=str(uuid.uuid4()), provider=data.provider, api_key=api_key_from_input(data),
-            base_url=data.base_url, enabled=data.enabled, thinking_format=data.thinking_format)
+            base_url=data.base_url, enabled=data.enabled, thinking_format=data.thinking_format,
+            api_format=data.api_format)
         session.add(platform)
         await session.flush()
         models = [ModelConfiguration(id=str(uuid.uuid4()), platform_id=platform.id,
@@ -126,7 +128,8 @@ async def update_configuration(configuration_id: str, data: ModelConfigurationIn
         platform = await get_configuration(session, configuration_id)
         api_key = api_key_from_input(data, platform)
         models = await get_models(session, platform.id)
-        endpoint_changed = (platform.provider, platform.base_url) != (data.provider, data.base_url)
+        endpoint_changed = (platform.provider, platform.base_url, platform.api_format) != (
+            data.provider, data.base_url, data.api_format)
         removed = [row for row in models if row.model_name not in data.model_names]
         for row in models if endpoint_changed else removed:
             if await configuration_in_use(session, row):
@@ -144,6 +147,7 @@ async def update_configuration(configuration_id: str, data: ModelConfigurationIn
             updated.append(row)
         platform.provider, platform.base_url, platform.api_key = data.provider, data.base_url, api_key
         platform.enabled, platform.thinking_format = data.enabled, data.thinking_format
+        platform.api_format = data.api_format
         await session.commit()
         await load_connections(session)
         return public_configuration(platform, updated)
@@ -183,7 +187,7 @@ async def test_configuration(data: ModelTestInput, request: Request, user=Depend
         raise HTTPException(422, "请选择当前配置中的模型进行测试")
     connection = ModelConnection(id=str(uuid.uuid4()), provider=data.provider, model_name=name,
         api_key=api_key_from_input(data, existing), base_url=data.base_url,
-        thinking_format=data.thinking_format)
+        thinking_format=data.thinking_format, api_format=data.api_format)
     try:
         extra_body_for(name, connection.provider, thinking_format=connection.thinking_format)
     except ValueError as error:
@@ -220,7 +224,9 @@ async def test_configuration(data: ModelTestInput, request: Request, user=Depend
     except Exception:
         error_code, message = "service_error", "模型调用失败，请检查配置后重试。"
     finally:
-        if client is not None:
+        if client is not None and hasattr(client, "aclose"):
+            await client.aclose()
+        elif client is not None and getattr(client, "client", None) is not None:
             await client.client.close()
     return {"success": success, "model_name": connection.model_name, "message": message,
             "error_code": error_code, "elapsed_ms": round((time.monotonic() - started) * 1000)}

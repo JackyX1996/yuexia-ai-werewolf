@@ -88,7 +88,11 @@ h3 { font-size: 17px; }
 .village-cast { display: flex; align-items: center; margin: 22px 0; padding-left: 6px; }
 .village-cast .portrait { width: 38px; height: 38px; border: 2px solid #c0aa99; border-radius: 50%; margin-left: -6px; box-shadow: 0 3px 8px #0004; }
 .cast-caption { color: #d7ced5; font-size: 12px; margin-left: 12px; }
+.mode-switch { display: flex; gap: 8px; margin: 0 0 14px; }
+.mode-switch button { border: 1px solid #655e70; background: transparent; color: #c9bdc9; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.mode-switch button.active { color: #302438; background: linear-gradient(135deg, #f0dbb7, #d4aa74); border-color: #f3ddba; }
 .hero-copy .primary { min-width: 245px; }
+.log-entry.god { font-size: 12px; color: #d7c6a4; text-align: left; background: #3a342844; border: 1px dashed #a08b6244; border-radius: 10px; padding: 8px 12px; }
 #btn-create:disabled { background: #48434f; border-color: #655e70; color: #b9b2c2; box-shadow: none; cursor: not-allowed; opacity: .75; }
 .game-model-availability { margin-top: 13px; max-width: 420px; color: #c6bbcd; font-size: 12px; }
 .game-model-availability button { margin-top: 8px; padding: 5px 10px; color: var(--gold); background: #211c2bdd; }
@@ -307,34 +311,46 @@ h3 { font-size: 17px; }
 .simple-header h1 { font-size: 29px; }
 
 /* Model connections share the lobby's colors and remain usable on mobile. */
-#model-settings-screen { width: min(1180px, 92vw); }
-.model-settings-intro { margin: 5px 0 24px; }
-.model-settings-layout { display: grid; grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr); gap: 24px; align-items: start; }
-.model-settings-list, .model-settings-editor { padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); min-width: 0; }
-.model-settings-list h2, .model-settings-editor h2 { font-size: 22px; }
-#model-configuration-list { margin-top: 16px; }
-.model-configuration-card { padding: 16px; margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; background: #ffffff03; }
-.model-configuration-card.selected { border-color: var(--gold); }
-.model-configuration-card h3 { overflow-wrap: anywhere; font-size: 15px; }
-.model-configuration-card .button-row { margin-top: 12px; }
-#model-configuration-form > label, #model-base-url-field > label, #model-thinking-format-field > label { display: block; margin: 17px 0 7px; }
-#model-configuration-form input:not([type="checkbox"]), #model-configuration-form select { width: 100%; min-width: 0; }
+#model-settings-screen { width: min(860px, 92vw); }
+.model-settings-intro { margin: 5px 0 22px; }
+#model-settings-screen .section-heading { align-items: center; }
+#model-configuration-list { margin-top: 8px; }
+.model-configuration-card { padding: 16px; margin-top: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); cursor: pointer; }
+.model-configuration-card:hover { border-color: #a99a91; }
+.model-configuration-card h3 { overflow-wrap: anywhere; font-size: 16px; }
+.model-configuration-card .button-row, .model-delete-confirm { margin-top: 12px; }
+.model-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.model-chip { padding: 3px 8px; border: 1px solid #705a7a55; border-radius: 999px; font-size: 12px; color: #d9c9df; }
+.model-chip.off { opacity: .55; }
+.model-editor-panel { width: min(640px, 100%); }
+.model-editor-head, .model-editor-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.model-editor-head h2 { margin: 0; }
+.model-editor-panel fieldset { border: 0; margin: 16px 0 0; padding: 0; }
+.model-editor-panel legend { margin-bottom: 8px; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice-row button { flex: 1 1 140px; }
+.choice-row button.active { color: #302438; background: linear-gradient(135deg, #f0dbb7, #d4aa74); border-color: #f3ddba; }
+#model-configuration-form > label, #model-base-url-field > label, #model-thinking-format-field > label, .model-test-row > label { display: block; margin: 16px 0 7px; }
+#model-configuration-form input:not([type="checkbox"]), #model-configuration-form select, #model-configuration-form textarea { width: 100%; min-width: 0; }
 .model-field-help { margin-top: 7px; font-size: 12px; overflow-wrap: anywhere; }
-.model-switches { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 22px; }
+.model-switches { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 18px; align-items: center; }
 .model-checkbox { display: flex; align-items: center; gap: 9px; cursor: pointer; }
 .model-checkbox input { accent-color: var(--gold); width: 16px; height: 16px; }
-.model-form-status { min-height: 26px; margin-top: 16px; color: var(--muted); overflow-wrap: anywhere; }
+.model-fixed-thinking { color: var(--muted); font-size: 12px; }
+.model-test-row { display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: center; margin-top: 8px; }
+.model-test-row > label { grid-column: 1 / -1; margin-bottom: 0; }
+.model-form-status { min-height: 22px; margin-top: 12px; color: var(--muted); overflow-wrap: anywhere; }
 .model-form-status.success { color: var(--mint); }
 .model-form-status.error { color: var(--danger); }
 .model-unavailable-note { color: #ddaaa6; }
 #model-api-key.has-saved-key::placeholder { color: var(--text); opacity: .85; }
-.model-advanced-settings { margin-top: 18px; }
+.model-advanced-settings { margin-top: 16px; }
 .model-advanced-settings summary { color: var(--muted); font-size: 12px; cursor: pointer; }
+.model-delete-confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: #ddaaa6; font-size: 13px; }
 @media (max-width: 760px) {
-  .model-settings-layout { grid-template-columns: 1fr; }
-  .model-settings-list, .model-settings-editor { padding: 18px; }
   .site-header nav { flex-wrap: wrap; justify-content: flex-end; }
-  .model-settings-layout .button-row { flex-wrap: wrap; }
+  .model-test-row, .model-editor-actions { grid-template-columns: 1fr; }
+  .model-editor-actions { flex-wrap: wrap; }
 }
 .gameover-banner { text-align: center; padding: 25px 20px 35px; border-radius: 19px; background: linear-gradient(180deg, #18192b45, #191826dc), url('/img/moonlight/village.png') center 35% / cover; border: 1px solid #806e8870; margin-bottom: 28px; }
 #gameover-icon { width: 70px; height: 70px; margin: auto; border: 1px solid #d3b78e; border-radius: 50%; font-size: 47px; color: #e9cb9e; text-shadow: 0 0 25px #e9cb9e44; box-shadow: 0 0 20px #e9cb9e22; }

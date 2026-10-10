@@ -12,7 +12,7 @@ from fastapi.exceptions import RequestValidationError
 from openai import APIStatusError
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from ai.llm_client import LLMClient, get_llm_client
+from ai.llm_client import LLMClient, get_llm_client, request_url
 from ai.model_configuration import (
     ModelConnection, ModelConfigurationError, PROVIDER_URLS, load_connections,
     migrate_legacy_connections, migrate_platform_connections, pick_connections, replace_connections, resolve_connection,
@@ -633,3 +633,50 @@ async def test_saved_key_is_masked_in_create_list_and_update_responses(model_api
 def test_short_key_mask_never_returns_original_secret(secret):
     from api.model_configuration import masked_api_key
     assert masked_api_key(secret) == ('********' if secret else None)
+
+
+def test_custom_root_rejects_concrete_endpoint_paths_and_official_providers_stay_on_chat():
+    from pydantic import ValidationError
+    for suffix in ("/chat/completions", "/responses", "/messages"):
+        with pytest.raises(ValidationError):
+            ModelConfigurationInput(**payload("openai", base_url="https://api.example/v1" + suffix))
+    official = ModelConfigurationInput(**payload("bailian", api_format="responses"))
+    assert official.api_format == "chat_completions"
+    assert official.base_url == PROVIDER_URLS["bailian"]
+
+
+def test_request_urls_match_the_three_custom_formats():
+    assert request_url("https://api.openai.com/v1", "chat_completions").endswith("/chat/completions")
+    assert request_url("https://api.openai.com/v1/", "responses") == "https://api.openai.com/v1/responses"
+    assert request_url("https://api.anthropic.com", "anthropic_messages") == "https://api.anthropic.com/v1/messages"
+    assert request_url("https://api.anthropic.com/v1", "anthropic_messages") == "https://api.anthropic.com/v1/messages"
+
+
+@pytest.mark.asyncio
+async def test_responses_and_anthropic_messages_use_their_own_requests():
+    posted = []
+
+    async def fake_post(url, headers, body):
+        posted.append((url, headers, body))
+        if url.endswith("/responses"):
+            return {"status": "completed", "output_text": '{"ok": true}'}
+        return {"stop_reason": "end_turn", "content": [{"type": "text", "text": '{"ok": true}'}]}
+
+    responses = LLMClient(connection=connection(provider="openai", name="custom-model", api_format="responses"))
+    anthropic = LLMClient(connection=connection(
+        provider="openai", name="custom-model", api_format="anthropic_messages",
+        base_url="https://api.anthropic.com"))
+    responses._post_json = fake_post
+    anthropic._post_json = fake_post
+    assert await responses.chat("系统", "用户") == {"ok": True}
+    assert await anthropic.chat("系统", "用户") == {"ok": True}
+    assert posted[0][0] == "http://localhost:1234/v1/responses"
+    assert posted[0][1]["Authorization"].startswith("Bearer ")
+    assert posted[0][2]["input"][0]["role"] == "system"
+    assert posted[0][2]["text"]["format"]["type"] == "json_object"
+    assert "messages" not in posted[0][2]
+    assert posted[1][0] == "https://api.anthropic.com/v1/messages"
+    assert posted[1][1]["x-api-key"] == "private-test-key"
+    assert posted[1][1]["anthropic-version"] == "2023-06-01"
+    assert posted[1][2]["system"] == "系统"
+    assert posted[1][2]["messages"] == [{"role": "user", "content": "用户"}]
