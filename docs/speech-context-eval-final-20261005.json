@@ -1,0 +1,90 @@
+{
+  "mode": "real configured models, entirely fictional evidence; no live DB",
+  "semantic_review": "Manually reviewed all four final samples: public references match the supplied speakers; future speakers remain hypothetical; PK uses prior public claims without inventing first-night motives or candidate status. This checks grounding and chronology, not strategy quality or universal model reliability.",
+  "results": [
+    {
+      "scenario": "seer_after_first_speaker",
+      "fictional": true,
+      "seat": 9,
+      "model": "MiniMax-M2.5",
+      "spoken_seats": [
+        2
+      ],
+      "pending_seats": [
+        5,
+        11,
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "2号说想跳预言家的报查验，那我就不客气了。我是预言家，昨晚查了6号，是个好人，金水。\n\n2号你先上来的，说听信息，那我现在报了查验，你接不接？你是好人还是狼？后面5、11、4有没有要对跳的？有对跳的尽管来，我6号金水在这立着。\n\n警徽给我，我预言家带队，警徽流先留后置位，听完发言再定。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 5.53,
+      "manual_grounding_review": "只引用2号已说的话和虚构的本人查验；5、11、4只作为后置位问题。"
+    },
+    {
+      "scenario": "villager_before_counterclaim",
+      "fictional": true,
+      "seat": 5,
+      "model": "deepseek-v4-pro",
+      "spoken_seats": [
+        2,
+        9
+      ],
+      "pending_seats": [
+        11,
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "9号跳预言家，验6金水，我听到了。2号你只是要听查验，现在9号报了，你什么态度？我上警是想看对跳，现在只有9号一个人跳，后面11和4还没发言。如果后面没人对跳，我倾向于信9号，但得先听完。9号你警徽流怎么留？另外，后面两位，如果有人要跳，直接报查验，别藏着。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 5.78,
+      "manual_grounding_review": "只引用2、9号；11、4后续对跳以如果表述，不声称已经对跳。"
+    },
+    {
+      "scenario": "wolf_counterclaim_after_public_seer",
+      "fictional": true,
+      "seat": 11,
+      "model": "doubao-seed-2-1-pro-260915",
+      "spoken_seats": [
+        2,
+        9,
+        5
+      ],
+      "pending_seats": [
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "5号说先听我和4号，那我表个态：我不上来穿神衣，就是想把警徽留在能盘逻辑的人手里。9号现在报6号金水，但只给结果没给心路和警徽流，这个预言家我暂时只能记一半。2号那句“想听查验”更像正常警上找信息，不像急着带节奏。4号，你要是预言家就直接报查验；不跳，也说说你认不认9号。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 10.64,
+      "manual_grounding_review": "可以选择不悍跳；回应2、5、9号，4号仅被追问，不虚构其发言。"
+    },
+    {
+      "scenario": "seer_pk_distinguishes_previous_claims",
+      "fictional": true,
+      "seat": 9,
+      "model": "MiniMax-M2.5",
+      "spoken_seats": [],
+      "pending_seats": [
+        11
+      ],
+      "has_previous_pass": true,
+      "speech": "11号，你跟我对跳，报1号金水，警徽流留3号8号。我先跳的预言家，我验6号是好人，你后跳验1号，时间上我更早报查验。\n\n我问你几个问题：你警徽流为什么留3和8？你的验人逻辑是什么？光说我是对跳没用，你得给出让我信服的依据。\n\n2号、4号、5号还在听，我跟11号谁更像预言家，大家可以对比。警徽流是用来找狼的，你留的两个人有什么特殊理由？\n\n11号，该你回应了。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 6.23,
+      "manual_grounding_review": "引用上一轮11号对跳和警徽流；未把对跳措辞当预知身份，未倒推首夜动机，未将3、8号警徽流对象归为候选人。"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{% if pk_targets %}
+现在是平票PK，第{{ round }}轮。台上的人是 {{ pk_targets }}。你在台上，请用几句话说明为什么不该投你。
+{% else %}
+现在是白天讨论环节，第{{ round }}轮，轮到你发言。
+{% endif %}
+
+## 当前局势
+- 当前轮次：第{{ round }}轮
+- 警长：{{ sheriff_info }}
+- 存活玩家：{{ alive_count }}人
+
+## 存活玩家列表
+{% for p in alive_players %}
+- {{ p.seat }}号位{% if p.seat == sheriff_seat %}（警长）{% endif %}{% if p.seat == seat %}（你）{% endif %}
+{% endfor %}
+
+{% if sheriff_speeches %}
+## 警长竞选发言记录
+{% for s in sheriff_speeches %}
+- {{ s.seat }}号位{% if s.withdrew %}竞选后退水{% elif s.speech %}竞选发言：{{ s.speech }}{% else %}放弃竞选{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if deaths_this_round %}
+## 本轮死亡信息
+{% for d in deaths_this_round %}
+- {{ d.seat }}号位死亡
+{% endfor %}
+{% endif %}
+
+{% include 'speech_turn.txt' %}
+
+## 本次已经听到的发言
+{% for speech in speeches %}
+- {{ speech.seat }}号位说：{{ speech.content }}
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+请发表你的看法。用你的性格开口，像坐在这桌上的人，不要像在念规则。引用原话或票型时必须核对实际记录和阶段；可以直接追问尚未发言的后置位，不要为了点名而编造依据。
+判断写在接话之前。说话冲不冲、别人说他像悍跳、多数人已经这么说，都不是依据。自称预言家的人把对跳者打成狼，只是重复他的自称。事前没有理由不是漏洞，要等说法和后来的发言、票、死亡对不上。
+{% if role == "werewolf" %}
+你是狼人。队友：{% for w in wolf_teammates %}{{ w.seat }}号位{% if not loop.last %}、{% endif %}{% endfor %}。这些只有你知道。发言里不能说出刀口、谁被救了，也不能点明队友。
+
+自爆时用这个格式；不自爆就用下面的普通发言格式。自爆会跳过本轮放逐投票。
+{"inner_thought": "理由", "speech": "我自爆", "action": {"type": "wolf_explode"}}
+{% elif role == "witch" %}
+你是女巫。解药还在时你知道昨夜刀口；解药用完后不知道新的刀口。说出刀口、银水或自己用过药，等于公开女巫身份。
+{% endif %}
+
+注意：发言不超过250个汉字。
+
+回复JSON格式：
+{
+  "inner_thought": "你的内心真实分析（不会公开）",
+  "speech": "你的公开发言内容（不超过250个汉字）",
+  "action": {"type": "speech"}
+}

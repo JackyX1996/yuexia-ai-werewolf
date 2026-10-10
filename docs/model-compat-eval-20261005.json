@@ -1,0 +1,100 @@
+[
+  {
+    "model": "qwen3.7-plus",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 49.86
+  },
+  {
+    "model": "qwen3.7-flash",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 47.42
+  },
+  {
+    "model": "qwen3.8-flash",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 51.86
+  },
+  {
+    "model": "qwen3.8-max",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 2.59
+  },
+  {
+    "model": "kimi-k3",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 12.57
+  },
+  {
+    "model": "glm-5.3",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 1.62
+  },
+  {
+    "model": "glm-5.2",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 1.81
+  },
+  {
+    "model": "MiniMax-M2.5",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 4.74
+  },
+  {
+    "model": "deepseek-v4-flash",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 1.48
+  },
+  {
+    "model": "deepseek-v4-pro",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 4.34
+  },
+  {
+    "model": "doubao-seed-2-1-lite-260915",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 3.31
+  },
+  {
+    "model": "doubao-seed-2-1-pro-260915",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 4.4
+  },
+  {
+    "model": "doubao-seed-evolving",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 2.6
+  },
+  {
+    "model": "deepseek-v4-1-flash-260910",
+    "synthetic": true,
+    "valid": true,
+    "fallback": false,
+    "elapsed_seconds": 1.74
+  }
+]

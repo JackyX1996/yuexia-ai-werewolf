@@ -1,0 +1,60 @@
+{
+  "game_id": 5,
+  "round": 1,
+  "stage": "day_speech",
+  "seat": 11,
+  "model": "kimi-k3",
+  "fallback_event_id": 318,
+  "fallback_timestamp_utc": "2026-10-06 00:19:38.968908",
+  "previous_public_speech_event_id": 316,
+  "gap_seconds": 93.142,
+  "original_attempt_errors_available": false,
+  "diagnosis": "Confirmed system fallback. Two 45s nonstream read timeouts inferred from 93s event gap; old attempt stderr unavailable. Mechanism reproduced independently with entirely fictional evidence.",
+  "isolated_baseline": {
+    "context_chars": 4269,
+    "elapsed_seconds": 45.17,
+    "exception": "APITimeoutError",
+    "fallback": true
+  },
+  "isolated_streaming": [
+    {
+      "elapsed_seconds": 59.365,
+      "fallback": false,
+      "transport": {
+        "transport": "stream",
+        "chunks": 1209,
+        "reasoning_chars": 7930,
+        "content_chars": 383,
+        "first_chunk_seconds": 0.871,
+        "first_answer_seconds": 54.245,
+        "finish_reason": "stop"
+      }
+    },
+    {
+      "elapsed_seconds": 36.921,
+      "fallback": false,
+      "transport": {
+        "transport": "stream",
+        "chunks": 738,
+        "reasoning_chars": 2202,
+        "content_chars": 417,
+        "first_chunk_seconds": 0.793,
+        "first_answer_seconds": 30.597,
+        "finish_reason": "stop"
+      }
+    }
+  ],
+  "validation_scope": "Latency, completion and action structure; no semantic correctness claim. Fictional v1 fixture had inconsistent seat wording, retained reports are transport evidence only; future script uses corrected v2 fixture.",
+  "fix": {
+    "streaming_models": [
+      "kimi-k3",
+      "kimi/kimi-k3"
+    ],
+    "idle_read_timeout_seconds": 45,
+    "total_decision_budget_seconds_including_retries": 120,
+    "only_final_content_accepted": true,
+    "requires_finish_reason": "stop",
+    "persists_safe_metadata": true
+  },
+  "regression_tests_passed": 146
+}

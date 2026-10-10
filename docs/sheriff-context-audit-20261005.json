@@ -1,0 +1,97 @@
+{
+  "game_id": 4,
+  "mode": "read-only local reconstruction; no LLM calls",
+  "original_request_archived": false,
+  "campaign_order": [
+    1,
+    12,
+    10,
+    8,
+    7
+  ],
+  "checks": [
+    {
+      "seat": 1,
+      "is_human": false,
+      "input_event_cutoff": 184,
+      "public_speech_event": 186,
+      "spoken_seats": [],
+      "pending_seats": [
+        12,
+        10,
+        8,
+        7
+      ],
+      "foreign_personal_thoughts": 0,
+      "later_public_speech_in_memory": false,
+      "reconstructed_memory_sha256": "88480cd4e56b1a37cfa431d7a06852d06587fc0c9fdc56e5f38633b1860849aa"
+    },
+    {
+      "seat": 12,
+      "is_human": false,
+      "input_event_cutoff": 186,
+      "public_speech_event": 188,
+      "spoken_seats": [
+        1
+      ],
+      "pending_seats": [
+        10,
+        8,
+        7
+      ],
+      "foreign_personal_thoughts": 0,
+      "later_public_speech_in_memory": false,
+      "reconstructed_memory_sha256": "40654349dc7786c52418c287850b5d84cbda98f0903c68c3c0e43d20ce934708"
+    },
+    {
+      "seat": 10,
+      "is_human": false,
+      "input_event_cutoff": 188,
+      "public_speech_event": 190,
+      "spoken_seats": [
+        1,
+        12
+      ],
+      "pending_seats": [
+        8,
+        7
+      ],
+      "foreign_personal_thoughts": 0,
+      "later_public_speech_in_memory": false,
+      "reconstructed_memory_sha256": "de59992920f75b8e196981a14dc8c043e59d6d6abd6cd5f5446f0578c45d695f"
+    },
+    {
+      "seat": 8,
+      "is_human": false,
+      "input_event_cutoff": 190,
+      "public_speech_event": 192,
+      "spoken_seats": [
+        1,
+        12,
+        10
+      ],
+      "pending_seats": [
+        7
+      ],
+      "foreign_personal_thoughts": 0,
+      "later_public_speech_in_memory": false,
+      "reconstructed_memory_sha256": "78408bc89c632e95f3159b8cfb08dd8e1923961c071bae7335db5041786b24f7"
+    },
+    {
+      "seat": 7,
+      "is_human": true,
+      "input_event_cutoff": 192,
+      "public_speech_event": 193,
+      "spoken_seats": [
+        1,
+        12,
+        10,
+        8
+      ],
+      "pending_seats": [],
+      "foreign_personal_thoughts": 0,
+      "later_public_speech_in_memory": false,
+      "reconstructed_memory_sha256": "caab9098ee8bc3641c1c89a4e7721f2df5f9e93a8d408796c563d172e8061f72"
+    }
+  ]
+}

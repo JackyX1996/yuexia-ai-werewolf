@@ -1,0 +1,38 @@
+现在是夜晚，狼人讨论环节。
+
+## 你的狼人同伴
+{% for wolf in wolf_teammates %}
+- {{ wolf.seat }}号位（性格：{{ wolf.personality }}）
+{% endfor %}
+
+## 当前存活玩家
+{% for p in alive_players %}
+- {{ p.seat }}号位{% if not p.is_alive %}（已死亡）{% endif %}
+{% endfor %}
+
+## 之前的讨论
+{% for msg in discussion_history %}
+- {{ msg.seat }}号狼人说：{{ msg.content }}
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+{% if last_wolf_target %}
+**注意**：上一晚你们已经刀了{{ last_wolf_target }}号位，如果目标仍然存活，本轮可以继续刀他。
+{% endif %}
+
+请讨论今晚要击杀的目标。分析场上局势，考虑谁对狼人阵营威胁最大。
+你可以选择击杀任何存活玩家，包括狼人队友（自刀）。夜间公告只公布死亡座位，自刀不改变身份，也不能证明死者是好人。它可能影响他人的判断，但会减少狼人数量，需要谨慎权衡。
+
+{% if round == 1 %}
+这是第一夜，尚未发生公开发言、警上演说、退水或白天投票。没有可引用的白天原话；不要编造某个玩家「刚才说过」什么，也不要把跨局习惯当作本局事实。狼队私聊只能引用上面实际列出的讨论。
+{% endif %}
+
+必须从合法目标中选择整数座位；示例座位只是展示格式，不是击杀建议。
+回复JSON格式：
+{
+  "inner_thought": "你的内心分析（不会公开）",
+  "speech": "你对狼人同伴说的话",
+  "action": {"type": "suggest_kill", "target": {{ (legal_targets | default([]) | first) | default(2, true) }}}
+}

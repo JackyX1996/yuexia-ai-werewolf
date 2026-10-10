@@ -1,0 +1,30 @@
+现在是报名上警阶段，请决定是否参与警长竞选。所有人同时作决定，尚未公布完整上警名单，也还没有竞选发言；不能声称别人已经上警、退水或对跳。
+
+{% include 'sheriff_timeline.txt' %}
+
+## 警长的权力
+- 投票权重为1.5倍
+- 死后可以把警徽交给一名存活玩家，也可以撕掉
+
+上警后你是候选人，首轮不能给警长投票。只有未上警的人能投。
+
+## 当前存活玩家
+{% for p in alive_players %}
+- {{ p.seat }}号位{% if p.seat == seat %}（你）{% endif %}
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+{% if role == "werewolf" %}
+你是狼人。队友：{% for w in wolf_teammates %}{{ w.seat }}号位{% if not loop.last %}、{% endif %}{% endfor %}。这是只有你知道的信息。
+{% endif %}
+
+请决定是否上警。run 必须是布尔值 true 或 false；下面仅为格式示例。
+
+回复JSON格式：
+{
+  "inner_thought": "你的分析",
+  "speech": "",
+  "action": {"type": "sheriff_signup", "run": true}
+}

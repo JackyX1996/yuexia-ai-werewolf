@@ -1,0 +1,17 @@
+{
+  "label": "nonstream-45s",
+  "evidence": "wholly fictional, no live DB or private match replay",
+  "results": [
+    {
+      "sample": 1,
+      "fictional": true,
+      "model": "kimi-k3",
+      "elapsed_seconds": 45.17,
+      "fallback": true,
+      "speech": "这轮信息我还没理清，我先听大家的判断。",
+      "action": {
+        "type": "speech"
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scope": "隔离评测，不属于当前真实对局",
+  "cases": [
+    {
+      "case": "first_night_no_public_speeches",
+      "model": "qwen3.8-max",
+      "public_speeches_provided": 0,
+      "habit_after_filter": "我喜欢先把依据说清楚。",
+      "speech": "兄弟们，第一晚没发言没信息，只能盲刀。咱们四个坐2、3、11、12，中间全是好人，这局得主动点。天亮要选警长，必须派个人上去悍跳预言家抢警徽，不然真预拿到警徽带节奏我们很难打。我建议11或者12去上警跳预言家，你俩商量一下谁去，发言稳一点。我和2号就不上了，留在警下给你们投票冲警徽，顺便听中间那些人怎么站边。刀人的话，别碰自己人，也别刀两边挨着我们的1和10，容易引火烧身。我倾向刀个中间的，比如7号，你们觉得呢？",
+      "action": {
+        "type": "suggest_kill",
+        "target": 7
+      },
+      "original_mock_quote_present": false,
+      "fallback": false
+    },
+    {
+      "case": "first_campaign_no_prior_speeches",
+      "model": "qwen3.8-max",
+      "public_speeches_provided": 0,
+      "habit_after_filter": "我喜欢先把依据说清楚。",
+      "speech": "3号预言家，昨晚验了11号，金水。我上警就是来拿警徽带队排坑的。7号和10号也上了警，等下听你们聊什么。谁要是跟我对跳，把查验报清楚，别光喊口号。今天先听发言，谁的逻辑链断了我点谁。警下的人看准了再投票，别被带节奏。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "original_mock_quote_present": false,
+      "fallback": false
+    }
+  ]
+}

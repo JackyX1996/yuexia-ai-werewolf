@@ -1,0 +1,30 @@
+你被淘汰了！作为猎人，你可以选择开枪带走一名玩家。
+
+## 你的死因
+- {{ cause_of_death_desc }}
+{% if can_shoot %}
+
+## 当前存活玩家
+{% for p in alive_players %}
+- {{ p.seat }}号位
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+可以开枪带走一名存活玩家，也可以不开枪。开枪是公开信息，所有人都会知道你带走了谁。target 为合法存活座位整数或 null；示例只展示格式。
+
+回复JSON格式：
+{
+  "inner_thought": "你的分析",
+  "action": {"type": "hunter_shot", "target": null}
+}
+{% else %}
+你是被女巫毒死的，无法开枪。
+
+回复JSON格式：
+{
+  "inner_thought": "你的想法",
+  "action": {"type": "hunter_shot", "target": null}
+}
+{% endif %}

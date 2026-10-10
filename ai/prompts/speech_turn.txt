@@ -1,0 +1,9 @@
+{% if speech_turn %}
+## 本次发言的席位与时序（主持人已确定）
+- 你是{{ speech_turn.self_seat }}号，现在轮到你；“你”和“我”始终指自己的座位。
+- 本次完整发言顺序：{% for s in speech_turn.order %}{{ s }}号{% if not loop.last %} → {% endif %}{% endfor %}。
+- 本次已经发言的前置位：{% for s in speech_turn.spoken_seats %}{{ s }}号{% if not loop.last %}、{% endif %}{% else %}无，你是本次首个发言者{% endfor %}。
+- 本次尚未发言的后置位：{% for s in speech_turn.pending_seats %}{{ s }}号{% if not loop.last %}、{% endif %}{% else %}无，你是本次最后发言者{% endfor %}。
+已发言的人只能引用实际记录；后置位本次会说什么尚未知晓，不能说他们“刚才报了查验/已经对跳/已经表态”。若他们上一阶段说过话，必须明确是上一阶段。
+上警不等于跳预言家。没提某人不等于知道他接下来会做什么。预测后置位必须写成假设。你不需要逐个点名全桌。
+{% endif %}

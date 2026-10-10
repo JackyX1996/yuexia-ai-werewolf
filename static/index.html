@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#151521">
+    <title>月下 · AI 狼人杀</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/theme-v2.css?v=model-settings-4">
+</head>
+<body>
+<div id="runtime-banner" class="runtime-banner hidden" role="status">模拟 AI · 界面预览，模型标签不代表真实调用。</div>
+<div id="app">
+    <div id="login-screen" class="screen active">
+        <div class="login-art"><div class="brand"><span class="brand-mark">☾</span><span>月下<span class="brand-sub">AI 狼人杀</span></span></div><div class="login-story"><div class="eyebrow">月光照见村庄，未必照见真相</div><h1>每一句话，<br>都有另一种可能。</h1><p>十一位各怀心思的对手。<br>一场属于你的月夜推理。</p><span class="tag">12 人预女猎白 · 独立 AI 人格</span></div></div>
+        <main class="login-card"><div class="eyebrow">月下 · 狼人杀</div><h2>入座，天黑了。</h2><p class="muted">登录你的账号，赴一场谎言与推理的邀约。</p><div id="login-form"><label for="login-username">用户名</label><input id="login-username" placeholder="你的用户名" autocomplete="username"><label for="login-password">密码</label><input type="password" id="login-password" placeholder="输入密码" autocomplete="current-password"><button id="btn-login" class="primary wide" onclick="login()">进入村庄 <span>→</span></button><div id="login-status" role="status"></div></div><div class="login-foot">☷ 仅限受邀玩家 · 你的身份，只有你知道</div></main>
+    </div>
+    <div id="home-screen" class="screen">
+        <header class="site-header"><div class="brand"><span class="brand-mark">☾</span><span>月下<span class="brand-sub">AI 狼人杀</span></span></div><nav><span id="user-nickname"></span><button onclick="showStats()">战绩统计</button><button id="btn-model-settings" class="hidden" onclick="showModelSettings()">模型配置</button><button id="btn-admin" class="hidden" onclick="showCreateUser()">分配账号</button><button onclick="logout()" class="quiet">退出</button></nav></header>
+        <main id="home-content" class="home-content">
+            <section class="hero-card"><div class="hero-copy"><div class="eyebrow">十二个人，一场月夜</div><h1>天黑了。<br>你相信谁？</h1><p>灯火熄灭之前，找到藏在人群中的狼人。</p><div class="hero-tags"><span>12 人经典局</span><span>11 AI + 你</span><span>独立人格与记忆</span></div><div class="village-cast" aria-hidden="true"><span class="portrait" style="--portrait-x:0%;--portrait-y:0%"></span><span class="portrait" style="--portrait-x:33.333%;--portrait-y:0%"></span><span class="portrait" style="--portrait-x:66.666%;--portrait-y:0%"></span><span class="portrait" style="--portrait-x:100%;--portrait-y:0%"></span><span class="cast-caption">十一位对手，各有心思。</span></div><button id="btn-create" class="primary" onclick="createGame()" disabled aria-describedby="game-model-availability" title="正在检查模型配置">进入村庄 · 开始对局 <span>→</span></button><div id="game-model-availability" class="game-model-availability"><p id="game-model-hint" role="status" aria-live="polite">正在检查模型配置…</p><button id="btn-configure-models" class="hidden" onclick="showModelSettings()">去配置模型 →</button><button id="btn-retry-models" class="hidden" onclick="refreshGameAvailability()">重新检查</button></div></div><div class="hero-caption">每一句话，都可能藏着另一层意思。</div></section>
+            <div class="home-grid"><section class="records"><div class="section-heading"><div><div class="eyebrow">昨日的故事</div><h2>我的对局</h2></div><span class="muted">继续对局 / 回看复盘</span></div><div id="game-list"></div><div id="game-list-empty" class="hidden empty-state">还没有故事。你的第一场对局，从今夜开始。</div></section><aside class="board-guide"><span class="tag">本局板子</span><h2>预女猎白</h2><p class="muted">4 狼人 · 4 平民 · 4 神职</p><div class="board-roles"><div class="board-role"><div class="role-art" data-role="werewolf" aria-hidden="true"></div><span>狼人<b>×4</b></span></div><div class="board-role"><div class="role-art" data-role="villager" aria-hidden="true"></div><span>平民<b>×4</b></span></div><div class="board-role"><div class="role-art" data-role="seer" aria-hidden="true"></div><span>预言家<b>×1</b></span></div><div class="board-role"><div class="role-art" data-role="witch" aria-hidden="true"></div><span>女巫<b>×1</b></span></div><div class="board-role"><div class="role-art" data-role="hunter" aria-hidden="true"></div><span>猎人<b>×1</b></span></div><div class="board-role"><div class="role-art" data-role="idiot" aria-hidden="true"></div><span>白痴<b>×1</b></span></div></div><div class="guide-row"><b>屠边规则</b><p>狼人全部出局，好人胜；神职或平民全部出局，狼人胜。</p></div><div class="guide-row"><b>警徽在场</b><p>首日竞选。警长拥有 1.5 票，决定发言方向并最后发言。</p></div><button class="secondary wide" onclick="showRules()">查看完整规则 ↗</button></aside></div>
+        </main>
+    </div>
+    <div id="stats-screen" class="screen content-screen"><header class="simple-header"><button onclick="goHome()">← 返回大厅</button><h1>战绩统计</h1></header><div class="stats-tabs"><button class="stats-tab active" id="tab-by-user" onclick="switchStatsTab('by-user')">AI 玩家</button><button class="stats-tab" id="tab-by-model" onclick="switchStatsTab('by-model')">模型</button><button class="stats-tab" id="tab-by-human" onclick="switchStatsTab('by-human')">真人</button></div><div id="stats-table"></div></div>
+    <div id="create-user-overlay" class="hidden modal-overlay"><div id="create-user-panel" class="modal-panel"><h2>分配真人账号</h2><input id="new-username" placeholder="输入用户名" aria-label="新账号用户名"><div id="create-user-result" class="hidden"></div><div class="button-row"><button class="primary" onclick="doCreateUser()">创建</button><button class="secondary" onclick="hideCreateUser()">取消</button></div></div></div>
+
+    <div id="model-settings-screen" class="screen content-screen">
+        <header class="simple-header"><button onclick="leaveModelSettings()">← 返回大厅</button><h1>模型配置</h1><span class="tag">管理员</span></header>
+        <p class="muted model-settings-intro">同一平台或 Base URL 共用一组 API Key，可添加任意多个模型。启用的模型组成公共对局池，有 1 个可用模型即可开局。每局随机选取 11 个，不足 11 个时重复分配。保存后立即生效。</p>
+        <div class="model-settings-layout">
+            <section class="model-settings-list"><div class="section-heading"><h2>已配置平台</h2><button id="btn-new-model" onclick="newModelConfiguration()">＋ 添加平台</button></div><div id="model-settings-summary" class="muted"></div><div id="model-configuration-list" aria-live="polite"></div></section>
+            <section class="model-settings-editor"><h2 id="model-editor-title">添加平台</h2>
+                <form id="model-configuration-form" autocomplete="off">
+                    <label for="model-provider">配置模式</label><select id="model-provider"><option value="bailian">百炼</option><option value="volcengine">火山方舟</option><option value="openai">OpenAI 兼容</option></select>
+                    <p id="model-endpoint-hint" class="muted model-field-help"></p>
+                    <label for="model-names">模型名（每行一个）</label><textarea id="model-names" required rows="5" placeholder="qwen-plus&#10;qwen-turbo&#10;my-custom-model" spellcheck="false"></textarea><p class="muted model-field-help">模型数量不限，共用此平台的地址和密钥。</p><p id="model-unavailable-list" class="model-field-help model-unavailable-note hidden"></p>
+                    <div id="model-base-url-field" class="hidden"><label for="model-base-url">Base URL</label><input id="model-base-url" type="url" placeholder="https://your-service.example/v1" maxlength="2048" spellcheck="false"><p class="muted model-field-help">填写 API 根地址，不包含 /chat/completions。</p></div>
+                    <label for="model-api-key">API Key</label><input id="model-api-key" type="password" placeholder="填写 API Key" autocomplete="new-password" spellcheck="false"><p id="model-key-hint" class="muted model-field-help">密钥保存于服务端。</p>
+                    <div class="model-switches"><label class="model-checkbox"><input id="model-enabled" type="checkbox" checked>将此平台的模型加入对局池</label><span class="model-fixed-thinking">Thinking 固定关闭</span></div>
+                    <details id="model-thinking-format-field" class="hidden model-advanced-settings"><summary>兼容服务高级设置</summary><label for="model-thinking-format">请求参数格式</label><select id="model-thinking-format"><option value="auto">自动适配（默认）</option><option value="enable_thinking">通用参数（固定 false）</option><option value="thinking">thinking.type（固定 disabled）</option><option value="reasoning_effort">reasoning_effort（固定 none）</option><option value="none">无需参数（非思考模型）</option></select></details>
+                    <label for="model-test-name">测试模型</label><select id="model-test-name"><option value="">请先填写模型名</option></select><div class="button-row"><button id="btn-save-model" type="submit" class="primary">保存配置</button><button id="btn-test-model" type="button" class="secondary" onclick="testModelConfiguration()">测试连通</button></div>
+                    <p id="model-form-status" class="model-form-status" role="status" aria-live="polite"></p>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <header class="game-header"><div class="game-brand"><button class="back-button" onclick="goHome()" aria-label="返回大厅，保留对局">←</button><div class="brand"><span class="brand-mark">☾</span><span>月下<span class="brand-sub" id="room-label">经典 12 人局</span></span></div></div><div id="phase-bar"><span id="phase-symbol">☾</span><div><span id="round-text">准备入座</span><strong id="phase-text">等待开始</strong></div></div><div id="header-right"><span id="connection-status" class="connection-status">连接中</span><span id="game-timer">00:00</span><button onclick="showRules()" class="quiet" aria-label="游戏规则">规则</button><button id="mobile-notes-button" onclick="toggleNotebook()" aria-label="推理簿" aria-expanded="false">✎ 推理簿</button><button id="btn-end-game" onclick="confirmEndGame()" class="quiet danger">结束</button></div></header>
+        <div class="game-layout">
+            <section class="table-panel">
+                <div class="table-heading"><div><span class="live-dot"></span><span>月下牌桌</span></div><span id="alive-count">12 人在场</span></div>
+                <div id="seats-container">
+                    <div id="table-arena">
+                        <div id="seats-left"></div>
+                        <div id="table-center"><div class="table-moon">☾</div><div id="table-phase">静待夜幕降临</div><div id="table-hint">点击玩家，记录你的判断</div></div>
+                    </div>
+                </div>
+                <div id="seats-right" hidden></div>
+                <div class="table-legend"><span><i class="legend-me"></i>你的座位</span><span><i class="legend-speaking"></i>当前发言</span><span>★ 警长</span></div>
+                <div class="identity-card"><div id="identity-icon">◇</div><div><span class="eyebrow">你的身份 · 仅你可见</span><strong id="role-info"></strong><p id="role-tip"></p></div></div>
+            </section>
+            <section id="log-panel"><div class="transcript-header"><div><div class="eyebrow">听见每一种立场</div><h2>桌上发言</h2></div><div class="log-tools"><select id="log-round-filter" aria-label="按轮次筛选发言" onchange="filterLogs()"><option value="all">全部轮次</option></select><button id="btn-key-events" onclick="toggleKeyEvents()">关键事件</button></div></div><div id="speaker-focus" aria-live="polite"><span class="speaker-orb">◌</span><div><strong id="speaker-title">等待对局开始</strong><p id="speaker-subtitle">入座后，你的身份将独立显示在左侧</p></div><span class="speaking-wave"><i></i><i></i><i></i><i></i></span></div><div id="speech-queue" aria-label="发言顺序"></div><div class="log-scroll-wrap"><div id="log-content" tabindex="0" aria-label="对局发言记录"></div><button id="new-messages" class="hidden" onclick="jumpToLatest()">↓ 查看新消息</button></div>
+                <div id="waiting-bar"><span class="live-dot"></span><div><strong id="waiting-title">等待其他玩家行动</strong><span id="waiting-tip">轮到你时，行动区会自动亮起。</span></div></div>
+                <div id="input-bar"><div id="input-header"><span id="input-label">轮到你了</span><span id="action-deadline"></span></div><div id="selection-preview" class="hidden"></div><div id="input-extra-buttons"></div><div id="input-row"><textarea id="input-text" placeholder="说出你的判断…" rows="2" maxlength="500" aria-label="你的发言"></textarea><div class="input-bottom"><span id="speech-count">0 / 500 · Ctrl / ⌘ + Enter 发送</span><button id="input-submit" class="primary">结束发言 →</button></div></div><div id="action-feedback" role="status"></div></div>
+            </section>
+            <div id="notebook-backdrop" class="notebook-backdrop hidden" onclick="toggleNotebook(false)"></div><aside class="notebook-panel" role="dialog" aria-modal="true" aria-label="我的推理簿"><div class="section-heading"><div><div class="eyebrow">只属于你的线索</div><h2>我的推理簿</h2></div><button class="notebook-close quiet" onclick="toggleNotebook(false)" aria-label="关闭推理簿">×</button></div><p class="muted note-intro">只保存在这台设备，不会发送给 AI。</p><div id="player-inspector"><div class="inspector-empty">点一下座位<br><span>记下身份倾向，或回看 TA 的发言。</span></div></div><label class="note-label" for="private-note">自由笔记</label><textarea id="private-note" placeholder="谁跳了预言家？谁在为谁说话？\n记录你在意的细节…" maxlength="3000"></textarea><span id="note-saved">自动保存于本机</span><div class="notebook-help"><span>✧</span><p>标记只是你的判断。<br>夜间倒牌不代表身份已被证实。</p></div></aside>
+        </div>
+        <div id="action-overlay" class="modal-overlay"><div id="action-panel" class="modal-panel"><h2 id="action-title"></h2><div id="action-body"></div><div id="action-buttons"></div></div></div>
+    </div>
+    <div id="gameover-screen" class="screen content-screen"><header class="simple-header"><button onclick="goHome()">← 返回大厅</button><span class="eyebrow">月落，真相揭晓</span></header><div class="gameover-banner"><div id="gameover-icon"></div><h1 id="gameover-title"></h1><p class="muted">月落之后，所有秘密都将揭晓。</p></div><div class="section-heading"><h2>身份揭晓</h2><span class="muted">看看谁骗过了你</span></div><div id="gameover-roles"></div><div id="gameover-events"></div><button class="primary wide" onclick="goHome()">返回大厅 →</button></div>
+    <div id="rules-overlay" class="hidden modal-overlay" onclick="if(event.target===this) hideRules()"><div class="modal-panel rules-panel" role="dialog" aria-modal="true" aria-labelledby="rules-title"><div class="section-heading"><h2 id="rules-title">这桌的规则</h2><button onclick="hideRules()" aria-label="关闭规则">✕</button></div><span class="tag">12 人预女猎白 · 有警徽 · 屠边</span><div class="guide-row"><b>一局如何进行</b><p>夜间行动 → 首日竞选警长 → 公布死亡 → 按序发言 → 放逐投票 → 遗言与技能 → 下一个夜晚。</p></div><div class="guide-row"><b>你的身份</b><p>预言家每夜查一位未查过的其他存活玩家；女巫解毒各一次，每夜只能一药，首夜可自救；猎人死亡可开枪，被毒无法开枪；白痴首度被放逐免死，失去投票权。平民用发言和投票找狼，狼人夜间商议击杀、白天隐藏身份。</p></div><div class="guide-row"><b>警长与平票</b><p>上警 → 演说 → 退水 → 警下投票；仅一候选人自动当选。警长白天 1.5 票，选择发言方向、最后发言；死后可移交或撕徽。平票者 PK，其他有票玩家再投，再平无人出局。允许弃票，不能投自己。</p></div><div class="guide-row"><b>出局以后</b><p>首夜死亡和白天放逐有遗言；后续夜死、自爆、被枪带走无遗言。你出局后可以继续旁观，结束时揭晓全员身份。</p></div><div class="guide-row"><b>怎样获胜</b><p>全部狼人出局，好人获胜。全部神职或全部平民出局，狼人获胜。夜间死亡仅公布座位，不公布真实死因。</p></div><button class="primary wide" onclick="hideRules()">记住了，回到桌上</button></div></div>
+</div>
+<script src="/game-availability.js?v=admin-role-1"></script>
+<script src="/app.js?v=admin-role-1"></script>
+<script src="/model-settings.js?v=4"></script>
+</body>
+</html>

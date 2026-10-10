@@ -1,0 +1,53 @@
+{% if is_tiebreak %}现在是警长平票后的PK演说；只在平票候选人间竞选。上一轮演说已结束，本次PK的后置位仍未发言。{% else %}你已经决定竞选警长，现在轮到你发表首次竞选演说。{% endif %}
+
+{% include 'sheriff_timeline.txt' %}
+
+## 警长的权力
+- 投票权重为1.5倍
+- 死后可以把警徽交给一名存活玩家，也可以撕掉
+
+## 本轮候选人
+{% for s in candidate_seats %}
+- {{ s }}号位{% if s == seat %}（你）{% endif %}
+{% endfor %}
+{% if original_candidate_seats %}
+## 首轮报名上警名单（不是本轮PK名单）
+{% for s in original_candidate_seats %}{{ s }}号{% if not loop.last %}、{% endif %}{% endfor %}。
+只有以上座位报过名；金水、查杀和警徽流中提到的座位不因此成为警上候选人。
+{% endif %}
+
+{% include 'speech_turn.txt' %}
+
+{% if previous_speeches %}
+## 上一轮竞选发言（已经结束，不是本次PK新发言）
+{% for s in previous_speeches %}
+- {{ s.seat }}号位：{{ s.speech }}
+{% endfor %}
+{% endif %}
+
+## 本次已经听到的竞选发言
+{% for s in speeches %}
+- {{ s.seat }}号位：{{ s.speech }}
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+{% if role == "werewolf" %}
+你是狼人。队友：{% for w in wolf_teammates %}{{ w.seat }}号位{% if not loop.last %}、{% endif %}{% endfor %}。这些只有你知道。发言里不能说出刀口、谁被救了，也不能点明队友。
+
+自爆时用这个格式；不自爆就用下面的普通发言格式。警上自爆会吞掉警徽。
+{"inner_thought": "理由", "speech": "我自爆", "action": {"type": "wolf_explode"}}
+{% endif %}
+
+请发表你的竞选演说。用你的性格开口，回应前置位时引用实际原话；问后置位时可以直接点名，不能为未发言者补造原话。可以选择重点回应，不必要求每名候选人都表态。注意：发言不超过250个汉字。
+判断写在接话之前。说话冲不冲、别人说他像悍跳，都不是依据。自称预言家的人把对跳者打成狼，只是重复他的自称。事前没有理由不是漏洞，要等说法和后来的发言、票、死亡对不上。
+说出口前，在自己的简短判断中核对引用的主体、阶段和先后顺序：谁确实说了这句话？这是一人的说法还是多人的共同态度？只是你推测的就说“我怀疑”，不能补成已经发生。
+“他跟我对跳”可以指已经听到他公开自称预言家，这是桌面公开信息，不代表知道他的真实身份。只能把尚未发生的对跳说成假设；不能把已公开的身份宣称说成只有狼人提前知道的秘密。
+
+回复JSON格式：
+{
+  "inner_thought": "你的分析",
+  "speech": "你的竞选演说（不超过250个汉字）",
+  "action": {"type": "sheriff_speech"}
+}

@@ -1,0 +1,28 @@
+竞选演说已经结束，现在是退水环节。你可以选择退水（放弃竞选）或坚持竞选。
+
+{% include 'sheriff_timeline.txt' %}
+
+## 当前候选人及竞选发言
+{% for c in candidates %}
+- {{ c.seat }}号位：{{ c.speech }}
+{% endfor %}
+
+## 你的竞选发言
+{{ your_speech }}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+{% if role == "werewolf" %}
+你是狼人。队友：{% for w in wolf_teammates %}{{ w.seat }}号位{% if not loop.last %}、{% endif %}{% endfor %}。这是只有你知道的信息。
+{% endif %}
+
+所有候选人同时决定，其他人尚未公布的退水选择不在你的信息范围内。
+请决定自己是否退水。withdraw 必须是布尔值 true 或 false；下面仅为格式示例。
+
+回复JSON格式：
+{
+  "inner_thought": "你的分析",
+  "speech": "",
+  "action": {"type": "sheriff_withdraw", "withdraw": false}
+}

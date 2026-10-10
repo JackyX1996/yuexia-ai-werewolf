@@ -1,0 +1,96 @@
+{
+  "mode": "real configured models, entirely fictional evidence; no live DB",
+  "semantic_review": "Second run: first-night motive error removed, but PK still treats an already public counterclaim as foreknowledge, invents candidate status for badge targets, and generalizes one speaker into several. Kept for comparison.",
+  "results": [
+    {
+      "scenario": "seer_after_first_speaker",
+      "fictional": true,
+      "seat": 9,
+      "model": "MiniMax-M2.5",
+      "spoken_seats": [
+        2
+      ],
+      "pending_seats": [
+        5,
+        11,
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "2号说想跳预言家的报查验，那我就不客气了。首夜我验了6号，是好人金水。我是预言家，警徽流先留5号再留11号。后面还没发言的5、11、4，你们有没有要跳的？想跳的报查验，我倒想看看谁会是那个悍跳的狼。2号你这轮先挂着，看后面发言再定。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 7.04
+    },
+    {
+      "scenario": "villager_before_counterclaim",
+      "fictional": true,
+      "seat": 5,
+      "model": "deepseek-v4-pro",
+      "spoken_seats": [
+        2,
+        9
+      ],
+      "pending_seats": [
+        11,
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "9号跳预言家验6金水，现在只有你一个人报查验，我暂时没法判断你是真是假。2号说上来听信息，这个心态我觉得没问题。我是5号，平民牌，竞选警长就是来帮好人阵营梳理逻辑的。后面11和4还没发言，如果你们有人要对跳预言家，赶紧报查验。如果没人跳，那9号的验人我先接着，但警徽我不一定给你，得看你警下的发言。我的优势是没身份压力，能客观分析，不会因为站错边就崩盘。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 6.45
+    },
+    {
+      "scenario": "wolf_counterclaim_after_public_seer",
+      "fictional": true,
+      "seat": 11,
+      "model": "doubao-seed-2-1-pro-260915",
+      "spoken_seats": [
+        2,
+        9,
+        5
+      ],
+      "pending_seats": [
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "2号说上来听信息，5号也说等我和4号，那我先把态度摆这：我不跳预言家，警徽可以给听得清逻辑的人。9号现在只报“6号好人”，没有心路历程，信息量太薄，先暂认不了。4号，你要是预言家就干脆报验；不跳就说清站边。我上警就是帮大家分辨对跳，不会和稀泥。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 7.59
+    },
+    {
+      "scenario": "seer_pk_distinguishes_previous_claims",
+      "fictional": true,
+      "seat": 9,
+      "model": "MiniMax-M2.5",
+      "spoken_seats": [],
+      "pending_seats": [
+        11
+      ],
+      "has_previous_pass": true,
+      "speech": "我确实是预言家，6号我首夜验的好人。\n\n11号有个致命漏洞——他说'9号是跟我对跳的'。真预言家不知道有人会跳，会说'有人对跳'，只有狼人知道对面是真的在跳，才会说'跟我对跳'。这句话直接暴露11号是狼。\n\n我警徽流先3号后8号，逻辑很简单：11号敢悍跳说明他狼队友在警上，3、8里大概率有他的队友，我需要验。\n\n2号、5号、4号都在等PK补充依据，这就是依据——11号这句话就是铁狼发言。信我的票投9号。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 6.67
+    }
+  ],
+  "findings": [
+    {
+      "scenario": "seer_pk_distinguishes_previous_claims",
+      "issues": [
+        "9号先公开跳预言家，11号随后说跟9号对跳属于已知公开信息，不证明预知身份。",
+        "3、8号只是11号的警徽流对象，不能据此说他们在警上。",
+        "仅4号明确提出等PK，不能说2、5、4都如此表态。"
+      ]
+    }
+  ]
+}

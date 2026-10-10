@@ -1,0 +1,151 @@
+[
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "arena": {
+      "h": 588,
+      "w": 588,
+      "x": 89.203125,
+      "y": 157
+    },
+    "avatarWidths": [
+      58.8
+    ],
+    "clippedByStage": [],
+    "count": 12,
+    "labelsOutsideSeat": [],
+    "overlaps": [],
+    "pageOverflow": false,
+    "scrollX": 0,
+    "scrollY": 0,
+    "table": {
+      "h": 305.7578125,
+      "w": 305.7578125,
+      "x": 230.32421875,
+      "y": 298.12109375
+    },
+    "tableSeatOverlap": []
+  },
+  {
+    "viewport": [
+      1280,
+      800
+    ],
+    "arena": {
+      "h": 488,
+      "w": 488,
+      "x": 97.203125,
+      "y": 157
+    },
+    "avatarWidths": [
+      48.8
+    ],
+    "clippedByStage": [],
+    "count": 12,
+    "labelsOutsideSeat": [],
+    "overlaps": [],
+    "pageOverflow": false,
+    "scrollX": 0,
+    "scrollY": 0,
+    "table": {
+      "h": 253.7578125,
+      "w": 253.7578125,
+      "x": 214.32421875,
+      "y": 274.12109375
+    },
+    "tableSeatOverlap": []
+  },
+  {
+    "viewport": [
+      1061,
+      720
+    ],
+    "arena": {
+      "h": 408,
+      "w": 408,
+      "x": 79.7109375,
+      "y": 157
+    },
+    "avatarWidths": [
+      40.8
+    ],
+    "clippedByStage": [],
+    "count": 12,
+    "labelsOutsideSeat": [],
+    "overlaps": [],
+    "pageOverflow": false,
+    "scrollX": 0,
+    "scrollY": 0,
+    "table": {
+      "h": 212.15625,
+      "w": 212.15625,
+      "x": 177.6328125,
+      "y": 254.921875
+    },
+    "tableSeatOverlap": []
+  },
+  {
+    "viewport": [
+      1440,
+      640
+    ],
+    "arena": {
+      "h": 400,
+      "w": 400,
+      "x": 183.203125,
+      "y": 156.796875
+    },
+    "avatarWidths": [
+      40
+    ],
+    "clippedByStage": [
+      "seat-7",
+      "seat-8",
+      "seat-9"
+    ],
+    "count": 12,
+    "labelsOutsideSeat": [],
+    "overlaps": [],
+    "pageOverflow": false,
+    "scrollX": 0,
+    "scrollY": 72,
+    "table": {
+      "h": 208,
+      "w": 208,
+      "x": 279.203125,
+      "y": 252.796875
+    },
+    "tableSeatOverlap": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "arena": {
+      "h": 140.1875,
+      "w": 350,
+      "x": 20,
+      "y": 133.84375
+    },
+    "avatarWidths": [
+      39
+    ],
+    "clippedByStage": [],
+    "count": 12,
+    "labelsOutsideSeat": [],
+    "overlaps": [],
+    "pageOverflow": false,
+    "scrollX": 0,
+    "scrollY": 0,
+    "table": {
+      "h": 0,
+      "w": 0,
+      "x": 0,
+      "y": 0
+    },
+    "tableSeatOverlap": []
+  }
+]

@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+sqlalchemy[asyncio]
+aiosqlite
+greenlet
+pydantic
+pydantic-settings
+openai
+langgraph
+langchain-core
+jinja2
+websockets
+httpx
+bcrypt
+pytest
+pytest-asyncio

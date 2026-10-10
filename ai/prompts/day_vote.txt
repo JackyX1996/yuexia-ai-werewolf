@@ -1,0 +1,41 @@
+{% if pk_targets %}
+现在是平票后的PK投票。你只能投台上的人：{{ pk_targets }}。不能投自己。
+{% else %}
+现在是投票环节，所有人已经发言完毕，请根据全部发言内容投票选择要淘汰的玩家。
+{% endif %}
+
+## 你的信息
+- 你是 {{ seat }}号位
+- 你不能投票给自己
+
+## 当前局势
+- 当前轮次：第{{ round }}轮
+- 警长：{{ sheriff_info }}
+
+{% if wolf_teammates %}
+## 你的狼人队友（仅你知道）
+{% for w in wolf_teammates %}
+- {{ w.seat }}号位
+{% endfor %}
+{% endif %}
+
+## 本轮所有发言
+{% for speech in speeches %}
+- {{ speech.seat }}号位说：{{ speech.content }}
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+## 可投票的存活玩家
+{% for p in votable_players %}
+- {{ p.seat }}号位{% if p.seat == sheriff_seat %}（警长）{% endif %}
+{% endfor %}
+
+根据你听到的发言和你已经知道的事投票。inner_thought 只写影响这张票的证据，180字内。说话冲不冲、别人觉得他像悍跳、多数人已经这么说，都不是证据。公开信息出现之前的选择没有事前理由，也不是证据。
+target 必须为合法座位整数或 null（弃票）；下面仅为格式示例。死因未公开的夜间死亡不能当成已经确定的狼刀。
+回复JSON格式：
+{
+  "inner_thought": "影响这张票的具体证据、与上次立场的关系（180字内）",
+  "action": {"type": "vote", "target": null}
+}

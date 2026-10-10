@@ -1,0 +1,26 @@
+现在是夜晚，预言家行动环节。
+
+## 当前存活玩家
+{% for p in alive_players %}
+- {{ p.seat }}号位{% if p.seat == seat %}（你自己）{% endif %}{% if p.seat == sheriff_seat %}（警长）{% endif %}
+{% endfor %}
+
+## 你已经查验过的玩家
+{% for check in past_checks %}
+- {{ check.target }}号位：{{ check.result }}
+{% endfor %}
+
+{% if already_checked_seats %}
+你已经查验过 {{ already_checked_seats | join("、") }} 号，不能再查他们。
+{% endif %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+请选择今晚要查验的一名存活玩家。
+必须从合法目标中选择整数座位；示例座位只是展示格式，不是查验建议。
+回复JSON格式：
+{
+  "inner_thought": "你选择查验这个人的理由",
+  "action": {"type": "seer_check", "target": {{ (legal_targets | default([]) | first) | default(2, true) }}}
+}

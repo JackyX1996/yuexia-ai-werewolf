@@ -1,0 +1,95 @@
+{
+  "mode": "real configured models, entirely fictional evidence; no live DB",
+  "semantic_review": "Initial run: first three scenarios respect available public speakers; PK contains unsupported retrospective check motive and wrongly generalizes one speaker into several. Preserved before prompt/memory repair.",
+  "results": [
+    {
+      "scenario": "seer_after_first_speaker",
+      "fictional": true,
+      "seat": 9,
+      "model": "MiniMax-M2.5",
+      "spoken_seats": [
+        2
+      ],
+      "pending_seats": [
+        5,
+        11,
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "2号说想跳预言家的报查验，那我就不客气了。我是预言家，昨晚查了6号，是个好人。\n\n5号、11号、4号，你们三位还没表态。我报了这个查验，后面如果有人对跳，希望能把逻辑说清楚。警上信息量有限，我先把这个信息抛出来，看后置位怎么回应。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 5.47
+    },
+    {
+      "scenario": "villager_before_counterclaim",
+      "fictional": true,
+      "seat": 5,
+      "model": "deepseek-v4-pro",
+      "spoken_seats": [
+        2,
+        9
+      ],
+      "pending_seats": [
+        11,
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "9号跳预言家，验6金水。2号只是过场，没报身份。我上警不是来对跳的，是帮好人阵营理逻辑。现在信息太少，9号这个查验我先记下，但真假得听完后面11、4怎么说。如果后面有人对跳，咱们对比查验逻辑和验人心路。如果没人对跳，9号先吃我一轮信任，但警下还得看票型和发言。后置位11、4，你们谁要跳预言家赶紧报查验，别藏着。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 6.1
+    },
+    {
+      "scenario": "wolf_counterclaim_after_public_seer",
+      "fictional": true,
+      "seat": 11,
+      "model": "doubao-seed-2-1-pro-260915",
+      "spoken_seats": [
+        2,
+        9,
+        5
+      ],
+      "pending_seats": [
+        4
+      ],
+      "has_previous_pass": false,
+      "speech": "我才是预言家，昨晚验10号是好人。9号这句“验6号是好人”先放着，单一金水没有说服力，后面要看他警徽流和视角。2号说上来听信息，状态像普通牌；5号不跳只等对跳，也正常。我警徽流先3后8，4号如果要跳，就把验人、心路和警徽流一次说清。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 11.33
+    },
+    {
+      "scenario": "seer_pk_distinguishes_previous_claims",
+      "fictional": true,
+      "seat": 9,
+      "model": "MiniMax-M2.5",
+      "spoken_seats": [],
+      "pending_seats": [
+        11
+      ],
+      "has_previous_pass": true,
+      "speech": "11号，你跟我对跳，报1号是好人。我问你——警上1号说过一句话吗？2号是让想跳预言家的报查验，1号根本没表态，你为什么首夜验他？这个查验动机你说得清吗？\n\n我验6号是因为6号警上没说话，我想验一个信息少的玩家，逻辑清晰合理。11号警徽流留3号、8号，请问3、8号警上干什么了？你这个警徽流有依据吗？\n\n2号、5号、4号都在等PK补充依据。我9号的查验摆在这里，6号好人。11号能给什么解释？为什么验1号？警徽流为什么留3、8？\n\n11号你后置位发言，请回答。",
+      "action": {
+        "type": "sheriff_speech"
+      },
+      "fallback": false,
+      "elapsed_seconds": 5.72
+    }
+  ],
+  "initial_findings": [
+    {
+      "scenario": "seer_pk_distinguishes_previous_claims",
+      "issues": [
+        "首夜验6号的动机被倒推为6号警上没说话：首夜还没有警上发言。",
+        "仅4号明确说等PK，不能归结为2、5、4都在等PK。"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+现在是第{{ round }}个夜晚，女巫行动环节。
+
+## 你的药水状态
+- 解药：{{ "可用" if has_antidote else "已使用" }}
+- 毒药：{{ "可用" if has_poison else "已使用" }}
+
+## 今晚狼人选择的刀口（待救药和死亡结算）
+{% if wolf_kill_target is not none %}
+- {{ wolf_kill_target }}号位被狼人选为目标，尚未结算最终死亡
+{% elif has_antidote %}
+- 今晚没有人被击杀
+{% else %}
+- 你已使用过解药，无法得知今晚谁被狼人击杀
+{% endif %}
+
+## 当前存活玩家
+{% for p in alive_players %}
+- {{ p.seat }}号位{% if p.seat == seat %}（你自己）{% endif %}
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+请决定是否使用药水：
+1. 如果有解药且有人被杀，可以选择救人
+2. 如果有毒药，可以选择毒一个人
+3. 也可以选择不使用任何药水
+注意：同一晚不能同时使用解药和毒药
+{% if round == 1 %}
+注意：这是第一个夜晚，如果你自己被刀，你可以使用解药自救。
+{% else %}
+注意：从第二个夜晚起，如果你自己被刀，你不能使用解药自救。
+{% endif %}
+
+save 必须为布尔值 true 或 false；poison_target 必须为合法座位整数或 null。不用药的示例仅展示格式。
+回复JSON格式：
+{
+  "inner_thought": "你的分析和决策理由",
+  "action": {"type": "witch_act", "save": false, "poison_target": null}
+}

@@ -1,0 +1,40 @@
+{
+  "game_id": 5,
+  "before": {
+    "status": "running",
+    "phase": "day_vote",
+    "round": 1,
+    "started_at": "2026-10-06 00:08:28.698400"
+  },
+  "after": {
+    "status": "finished",
+    "phase": "game_end",
+    "round": 2,
+    "started_at": "2026-10-06 00:08:28.698400"
+  },
+  "diagnosis": "Day 1 exile vote and last words had committed, but no background task remained. Old process exit/failure cause was not durably logged. DB phase still said day_vote after last words.",
+  "roles_models_and_survivors_unchanged": true,
+  "original_vote_unchanged": true,
+  "original_last_words_unchanged": true,
+  "first_day_vote_result_count": 1,
+  "first_day_exile_last_words_count": 1,
+  "recovery": "Authenticated WebSocket reconnect, one background task, resume from completed day boundary at round 2; no reset or replay.",
+  "scope": "Explicit completed-day checkpoints; older games only when vote death and public last words prove no pending hunter or sheriff transfer. Unfinished night/actions/PK are not inferred.",
+  "regression_tests_passed": 167,
+  "observed_recovery": {
+    "round": 2,
+    "phase": "wolf_kill",
+    "ai_followup_event_ids": [
+      331,
+      332
+    ],
+    "background_task_failed": false
+  },
+  "terminal_event": {
+    "id": 333,
+    "timestamp_utc": "2026-10-06 01:29:12.176030",
+    "public_reason": "游戏结束！玩家长时间未操作，本局自动结束。",
+    "reason": "human_action_timeout",
+    "human_timeout_seconds": 2400
+  }
+}

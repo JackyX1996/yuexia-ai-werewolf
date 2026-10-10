@@ -1,0 +1,26 @@
+{% if is_tiebreak %}现在是警长平票后的PK投票，只能在下面的PK候选人中选择。{% else %}现在是首轮警长投票，下面仅列仍在竞选、未退水的候选人。{% endif %}
+
+{% include 'sheriff_timeline.txt' %}
+
+## 竞选者及其演说
+{% for c in candidates %}
+- {{ c.seat }}号位：{{ c.speech }}
+{% endfor %}
+
+## 你这会儿脑子里装着的
+{{ memory_summary }}
+
+{% if wolf_teammates %}
+## 你的狼人队友（仅你知道）
+{% for w in wolf_teammates %}
+- {{ w.seat }}号位
+{% endfor %}
+{% endif %}
+
+请选择你支持的警长候选人。不能投给自己。target 从合法候选人的整数座位中选择，也可以用 null 弃票；示例不是推荐弃票。说话冲不冲、别人觉得他像悍跳、多数人已经这么说，都不是证据。公开信息出现之前的选择没有事前理由，也不是证据。
+
+回复JSON格式：
+{
+  "inner_thought": "你的分析",
+  "action": {"type": "sheriff_vote", "target": null}
+}
